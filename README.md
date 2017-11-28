@@ -1,12 +1,12 @@
 # PROJECT COMMUNICATION: 
 imundboquant.slack.com
-2nd.........
-Email: mikael[att]furesjo.se
-Skype: mikaelfuresjo1
-ZuluTrade Account: https://www.zulutrade.com/trader/354968/trading
-Facebook group: https://www.facebook.com/groups/Borsrobotar/
-Youtube Channel: https://www.youtube.com/user/FuresjoFinancialTrad/videos
-Twitter: https://twitter.com/Mikael_Furesjo
+<br />2nd.........
+<br />Email: mikael[att]furesjo.se
+<br />Skype: mikaelfuresjo1
+<br />ZuluTrade Account: https://www.zulutrade.com/trader/354968/trading
+<br />Facebook group: https://www.facebook.com/groups/Borsrobotar/
+<br />Youtube Channel: https://www.youtube.com/user/FuresjoFinancialTrad/videos
+<br />Twitter: https://twitter.com/Mikael_Furesjo
 
 
 <br /> OPEN-SOURCE PROJECT | Machine learning in Python for stock market and forex market predictions and fully automated trading. 
