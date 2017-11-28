@@ -1,5 +1,5 @@
 # PROJECT COMMUNICATION: 
-#imundboquant.slack.com
+imundboquant.slack.com
 
 <br /> OPEN-SOURCE PROJECT | Machine learning in Python for stock market and forex market predictions and fully automated trading. 
 <br /> USE DropBox link to download Forex End-Of-Day (EOD) data. 
