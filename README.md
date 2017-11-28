@@ -3,6 +3,7 @@ imundboquant.slack.com
 <br />2nd.........
 <br />Email: mikael[att]furesjo.se
 <br />Skype: mikaelfuresjo1
+<br />Homepage: http://www.beststrategies4trading.com/
 <br />ZuluTrade Account: https://www.zulutrade.com/trader/354968/trading
 <br />Facebook group: https://www.facebook.com/groups/Borsrobotar/
 <br />Youtube Channel: https://www.youtube.com/user/FuresjoFinancialTrad/videos
