@@ -30,7 +30,7 @@ import pandas as pd
 import time
 import random
 
-TrainLocation = r'C:\Users\UserTrader\Documents\ImundboQuant\InstrumentList\IQ19p_FX30\50kFX30sortDate_535ft.xlsx'
+TrainLocation = r'C:\Users\UserTrader\Documents\ImundboQuant\InstrumentList\IQ19p_FX30\TrainingDataset_IQ19qFX30.xlsx'
 
 
 trainData = pd.read_excel(TrainLocation)
