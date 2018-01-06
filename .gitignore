@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/ImundboQuant-Private.sln
+/ImundboQuant-Private.pyproj
+/ImundboQuant-Private.pyproj.user
