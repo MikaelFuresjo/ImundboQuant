@@ -6,3 +6,5 @@
 /ImundboQuant-Private.sln
 /ImundboQuant-Private.pyproj
 /ImundboQuant-Private.pyproj.user
+__pycache__
+/src/IQ19p_60_SMA3_C.txt
