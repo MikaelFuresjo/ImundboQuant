@@ -25,17 +25,37 @@ SOFTWARE.
 IMUNDBO QUANT v1.9 (Gridsearch script)
 """
 from sklearn.ensemble import RandomForestClassifier
+import os
 import numpy as np
 import pandas as pd
 import time
 import random
 
-TrainLocation = r'C:\Users\UserTrader\Documents\ImundboQuant\InstrumentList\IQ19p_FX30\TrainingDataset_IQ19qFX30.xlsx'
+from gui.console import Console
+from metrics.Timer import Timer
+
+c = Console(
+"""   ____                                _ _     _       _   _               
+  / ___|_ __ ___  ___ ___  __   ____ _| (_) __| | __ _| |_(_) ___  _ __    
+ | |   | '__/ _ \/ __/ __| \ \ / / _` | | |/ _` |/ _` | __| |/ _ \| '_ \   
+ | |___| | | (_) \__ \__ \  \ V / (_| | | | (_| | (_| | |_| | (_) | | | |  
+  \____|_|  \___/|___/___/   \_/ \__,_|_|_|\__,_|\__,_|\__|_|\___/|_| |_|  
+""")
+
+TrainLocation = r'c:\data\stock\50kFX30sortDate_535ft.xlsx'
+#TrainLocation = r'C:\Users\UserTrader\Documents\ImundboQuant\InstrumentList\IQ19p_FX30\TrainingDataset_IQ19qFX30.xlsx'
 
 
-trainData = pd.read_excel(TrainLocation)
-print(trainData)
 
+fileSize = os.path.getsize(TrainLocation) / 1024. / 1024.
+
+print ('Reading {0:.2f}MB of training data from {1}...'.format(fileSize, TrainLocation))
+
+
+trainData = pd.read_excel(TrainLocation, parse_dates=['_DateStamp'])
+#print(trainData)
+
+c.timer.print_elapsed("Training complete")
 
 #_featureToCheck = "_Date"
 #_featureToCheck = "_Diff_CtoL"
@@ -59,18 +79,23 @@ _featureToCheck = "_SMA3_C"
 #_featureToCheck = "_DiffD3_C"
 #_featureToCheck = "Diff_RL3_RL13"
 
-trainData = trainData.sort(_featureToCheck, ascending=False)
-print(trainData)
+print("Sorting training data by {0}...".format(_featureToCheck))
+trainData = trainData.sort_values(by=[_featureToCheck], ascending=False)
+#print(trainData)
 
-countX = 0
+c.timer.print_elapsed("Sorting complete")
 
-while (countX < 1000000):
-    
+numIterations = 10
+
+for countX in range(1, numIterations+1):
+    iterationTimer = Timer()
+
+    print("\n\nStarting iteration {0} / {1}".format(countX, numIterations))
+
     units = 16
     max_feat_Rand = 12
-    countX = countX + 1
+
     time.sleep(1)
-    StartTime = time.time()  
     
 
 
@@ -228,12 +253,8 @@ while (countX < 1000000):
         _SharpMin = round(_minScore/_stdScore,6)
         _SharpMean = round(_meanScore/_stdScore,6)
         
-        EndTime = time.time()
-        TotalTime = round((EndTime - StartTime)/60,2)
         
-        
-        
-        print(str(_minScore) + str("   ")+ str(TotalTime))
+        c.timer.print_elapsed("Min score {0}".format(_minScore))
 
         _fileNameOfResults = str('IQ19p_')+str(_CV)+str(_featureToCheck)+str('.txt')   # put in path and filename for results       
 
@@ -241,7 +262,7 @@ while (countX < 1000000):
         appendFile.write('\n' + str(_minScore)+
 
                         str(',Time:,')  +
-                        str(TotalTime) + 
+                        str(c.timer.elapsed()) + 
 
                         str(',CV:,')  +
                         str(_CV) + 
@@ -286,3 +307,24 @@ while (countX < 1000000):
         FEATURES = []
     except Exception as e:
         print(str(e))           
+
+    iterationTimer.print_elapsed("Completed iteration {0}".format(countX), False)
+
+    c.timer.print_elapsed("Total elapsed")
+
+print("\n\n =================================")
+c.timer.print_elapsed("\n\nCompleted processing after {0} iterations".format(numIterations))
+
+print("Min score:     {0:.4f}".format(_minScore))
+print("CV:            {0:.4f}".format(_CV))
+print("Sort:          {0}".format(_featureToCheck))
+print("Max score:     {0:.4f}".format(_meanScore))
+print("Std score:     {0:.4f}".format(_stdScore))
+print("Sharp min:     {0:.4f}".format(_SharpMin))
+print("Sharp mean:    {0:.4f}".format(_SharpMean))
+print("Num feats:     {0}".format(units))
+print("Min leaf:      {0}".format(min_samples_leaf_Rand))
+print("Max feat:      {0}".format(max_feat_Rand))
+print("Leaf nodes:    {0}".format(max_leaf_nodes_Rand))
+print("Depth of tree: {0}".format(max_depth_Rand))
+print("Num trees:     {0}".format(n_estimators_Rand))
