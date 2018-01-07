@@ -1,0 +1,36 @@
+{
+  "paths": {
+    "root": "c:\\Documents\\ImundboQuant",
+    "features": {
+      "folder": "features",
+      "filePrefix": "FX30_IQ19p"
+    },
+    "pickles": {
+      "folder": "pickles"
+    },
+    "training": {
+      "folder": "training",
+      "fileName": "TrainingDataset_IQ19qFX30.xlsx"
+    }
+  },
+  "learning": {
+    "slot": "10",
+    "horizon": "Tgt_SCH05to08",
+    "trainingInst": "LH40_535ft",
+    "numFeatures": 8
+  },
+  "classifiers": {
+    "randomForest": {         
+      "n_estimators": 150,    
+      "max_features": null,
+      "max_depth": 150,
+      "min_samples_split": 150,
+      "min_samples_leaf": 50, 
+      "max_leaf_nodes": 10000, 
+      "n_jobs": -1,
+      "random_state": 42      
+    }
+  }
+
+
+}
