@@ -1,5 +1,6 @@
 import json
 from config.IQPreProcessConfig import IQPreProcessConfig
+from config.IQPickleProducerConfig import IQPickleProducerConfig
 
 class IQConfig(object):
     configFile = None
@@ -7,6 +8,7 @@ class IQConfig(object):
 
     root = None
     preProcess = None
+    pickleProducer = None
 
     def __init__(self, configFile=r"..\config\config.json"):
         self.configFile = configFile
@@ -21,3 +23,4 @@ class IQConfig(object):
     def parseConfig(self):
         self.root = self.config["root"]
         self.preProcess = IQPreProcessConfig(self)
+        self.pickleProducer = IQPickleProducerConfig(self)
