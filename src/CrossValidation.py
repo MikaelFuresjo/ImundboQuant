@@ -31,6 +31,7 @@ import pandas as pd
 import time
 import random
 
+from config.IQConfig import IQConfig
 from gui.console import Console
 from metrics.Timer import Timer
 
@@ -42,8 +43,11 @@ c = Console(
   \____|_|  \___/|___/___/   \_/ \__,_|_|_|\__,_|\__,_|\__|_|\___/|_| |_|  
 """)
 
-TrainLocation = r'c:\data\stock\50kFX30sortDate_535ft.xlsx'
-#TrainLocation = r'C:\Users\UserTrader\Documents\ImundboQuant\InstrumentList\IQ19p_FX30\TrainingDataset_IQ19qFX30.xlsx'
+
+config = IQConfig()
+
+
+TrainLocation = config.crossValidation.getTrainingFilePath()
 
 
 
@@ -79,21 +83,25 @@ _featureToCheck = "_SMA3_C"
 #_featureToCheck = "_DiffD3_C"
 #_featureToCheck = "Diff_RL3_RL13"
 
+_CV = 60 #USE 60 to slit in to seperate 3M periods or 180 to 1M periods
+_fileNameOfResults = os.path.join(config.crossValidation.getTrainingFolder(), 'IQ19p_' + str(_CV) + _featureToCheck + '.txt')   # put in path and filename for results       
+
+
 print("Sorting training data by {0}...".format(_featureToCheck))
 trainData = trainData.sort_values(by=[_featureToCheck], ascending=False)
 #print(trainData)
 
 c.timer.print_elapsed("Sorting complete")
 
-numIterations = 10
+numIterations = config.crossValidation.numIterations
 
 for countX in range(1, numIterations+1):
     iterationTimer = Timer()
 
     print("\n\nStarting iteration {0} / {1}".format(countX, numIterations))
 
-    units = 16
-    max_feat_Rand = 12
+    #units = 16
+    #max_feat_Rand = 12
 
     time.sleep(1)
     
@@ -225,7 +233,6 @@ for countX in range(1, numIterations+1):
         y = trainData[_Horizont].values # put in relevant target class
         
       
-        _CV = 60 #USE 60 to slit in to seperate 3M periods or 180 to 1M periods
       
         logreg = RandomForestClassifier(n_estimators = n_estimators_Rand,
                                         max_depth = max_depth_Rand,
@@ -256,7 +263,6 @@ for countX in range(1, numIterations+1):
         
         c.timer.print_elapsed("Min score {0}".format(_minScore))
 
-        _fileNameOfResults = str('IQ19p_')+str(_CV)+str(_featureToCheck)+str('.txt')   # put in path and filename for results       
 
         appendFile = open(_fileNameOfResults, 'a') # put in path and filename for results
         appendFile.write('\n' + str(_minScore)+
@@ -303,6 +309,7 @@ for countX in range(1, numIterations+1):
                         str(',Features: ,') + 
                         str(FEATURES))
      
+        print("Appended row to {0}".format(_fileNameOfResults))
         appendFile.close()
         FEATURES = []
     except Exception as e:

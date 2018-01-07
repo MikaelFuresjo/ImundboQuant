@@ -1,4 +1,5 @@
 import json
+from config.IQCrossValidationConfig import IQCrossValidationConfig
 from config.IQPreProcessConfig import IQPreProcessConfig
 from config.IQPickleProducerConfig import IQPickleProducerConfig
 
@@ -9,6 +10,7 @@ class IQConfig(object):
     root = None
     preProcess = None
     pickleProducer = None
+    crossValidation = None
 
     def __init__(self, configFile=r"..\config\config.json"):
         self.configFile = configFile
@@ -24,3 +26,4 @@ class IQConfig(object):
         self.root = self.config["root"]
         self.preProcess = IQPreProcessConfig(self)
         self.pickleProducer = IQPickleProducerConfig(self)
+        self.crossValidation= IQCrossValidationConfig(self)

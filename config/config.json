@@ -30,6 +30,13 @@
       "random_state": 42
     }
   },
+  "crossValidation": {
+    "training": {
+      "folder": "CrossValidation",
+      "fileName": "50kFX30sortDate_535ft.xlsx"
+    },
+    "numIterations": 10
+  },
 
   "paths": {
   }
