@@ -3,10 +3,10 @@ import os
 class IQPreProcessConfig(object):
     iqConfig = None
 
-    folderName : None
-    instrumentsFolderName : None
+    folderName = None
+    instrumentsFolderName = None
     
-    featuresFileName: None
+    featuresFileName = None
 
     def __init__(self, iqConfig):
         self.iqConfig = iqConfig
@@ -23,5 +23,5 @@ class IQPreProcessConfig(object):
         return os.path.join(self.iqConfig.root, self.folderName)
 
     def getInstrumentsFolder(self):
-        return os.path.join(self.getFolder(), self.instrumentsFolderName)
+        return os.path.join(self.iqConfig.root, self.instrumentsFolderName)
 

@@ -35,6 +35,7 @@ from datetime import datetime
 import sys
 from matplotlib.dates import date2num
 
+from config.IQConfig import IQConfig
 from gui.console import Console
 
 c = Console(
@@ -44,23 +45,42 @@ c = Console(
  |  __/| | |  __/ |_) | | | (_) | (_|  __/\__ \__ \                        
  |_|   |_|  \___| .__/|_|  \___/ \___\___||___/___/                        
                 |_|                                  
+
+ Preprocess ticker data and extract features to use optimizing machine learning system
+ Ticker data should be inside "instrumentsFolder", one csv file per ticker.
+
+ Each file is expected to contain comma-separated values:
+ ["Date", "Open", "High", "Low", "Close", "Volume", "OI"]
+
 """)
 
-#put in your path to the folder of your instrument files
-#path = r'C:\Users\UserTrader\Documents\ImundboQuant\LargeCap_txt'  
-#path = r'C:\Users\UserTrader\Documents\ImundboQuant\InstrumentList\__ETF30' 
-path = r'c:\data\stock\Instrument_FX30'
+# Settings are kept in config/config.json
+#########################################
+#  Example config relevant PreProcess:
+#  {
+#     "root": "c:\\data",
+#     "preProcess": {
+#       "folder": "PreProcess",
+#       "instrumentsFolder": "PreProcess\\Instrument_FX30",
+#       "featuresFile": "MASSIVE_IQ19p_535ft.txt"
+#     },
+#  }
 
-instList = []
-instList = os.listdir(path)
 
-print ('Reading {0} files with ticker data from {1}...'.format(len(instList), path))
+config = IQConfig()
+preProcessPath = config.preProcess.getFolder()
+instrumentsPath = config.preProcess.getInstrumentsFolder()
+
+instruments = os.listdir(instrumentsPath)
+numInstruments = len(instruments)
+
+print ('Reading {0} files with ticker data from {1}...'.format(numInstruments, instrumentsPath))
 
 _justOpen = 0.0
 _justHigh = 0.0
 _justLow = 0.0
 _justClose = 0.0
-eachTicker = 0.0
+instrument = 0.0
 _DateStamp = 0.0
 _Return01 = 0.0
 Tgt_SCH05to08 = 0.0
@@ -132,29 +152,31 @@ _SMA3vs34 = 0.0
 numCompleted = 0
 numFailed = 0
 
-for index, eachTicker in enumerate(instList):
-    FileLocation = path + '\\'+ eachTicker
-    fileName = os.path.splitext(eachTicker)[0]
-    #Date, Open, High, Low, Close, Volume, OI = np.loadtxt(FileLocation, delimiter=',', unpack=True,converters={ 0: bytespdate2num('%Y-%m-%d')})
+for index, instrument in enumerate(instruments):
+    instrumentPath = os.path.join(instrumentsPath, instrument)
+    instrumentName = os.path.splitext(instrument)[0]
+    #Date, Open, High, Low, Close, Volume, OI = np.loadtxt(instrumentPath, delimiter=',', unpack=True,converters={ 0: bytespdate2num('%Y-%m-%d')})
     
-    print("\nProcessing {0} ({1} / {2})...".format(fileName, index+1, len(instList)))
+    print("\nProcessing {0} ({1} / {2})...".format(instrumentName, index+1, numInstruments))
 
 
     try:
-        data = pd.read_csv(FileLocation, parse_dates=['Date'], header=None, names=["Date", "Open", "High", "Low", "Close", "Volume", "OI"])
+        data = pd.read_csv(instrumentPath, parse_dates=['Date'], header=None, names=["Date", "Open", "High", "Low", "Close", "Volume", "OI"])
         Date, Open, High, Low, Close, Volume, OI = data.values.T
         #Date = date2num(Date) #Todo: Remove this and keep native Datetime
     except Exception as e:
         numFailed+=1
-        print("Error processing {0}: {1}. Skipping".format(eachTicker, e))
+        print("Error processing {0}: {1}. Skipping".format(instrument, e))
         continue
 
     Zeros = [1]*len(Date) #making extra data array with "1" for future calculation of MA with linear regression
-    noInstList = len(Date) #skip the last 60 days for making space for P/L calculation for at most 34 days
+    numDates = len(Date) 
     
-    print("Iterating {0} rows, using range [400:-35]".format(noInstList))
+    print("Iterating {0} rows, using range [400:-35]".format(numDates))
 
-    for x in range(400, noInstList-35): #skip the last 400 days for making space to calculate indicatiors that need 377 past days
+    # skip the last 35 days for making space for P/L calculation for at most 34 days
+    # skip the last 400 days for making space to calculate indicatiors that need 377 past days
+    for x in range(400, numDates-35): 
 
         
 ### START First part -  calculate on how high the Risk/Reward Ratio is for future move in 1,2,3,5,8,13,21 days 
@@ -2306,14 +2328,14 @@ for index, eachTicker in enumerate(instList):
                 ### END calculation of choosen list of FEATURES for the MACHINE LEARNING process ###            
             
                 ### START part where to write every Future value and Feature, day by day and intrument by instrument to .txt file to read csv style. 
-                LocationToSave = FileLocation = path + '\\MASSIVE_IQ19l_535ft.txt'
+                LocationToSave = os.path.join(preProcessPath, config.preProcess.featuresFileName)
                 saveFile = open(LocationToSave,'a')
                 lineToWrite = (
                             str(_justOpen) + ',' +
                             str(_justHigh) + ',' +
                             str(_justLow) + ',' +
                             str(_justClose) + ',' +                        
-                            str(eachTicker) + ',' +
+                            str(instrument) + ',' +
                             str(_DateStamp) + ',' +
                             str(_Return01) + ',' +
                             str(Tgt_SCH05to08) + ',' +
@@ -2869,9 +2891,9 @@ for index, eachTicker in enumerate(instList):
                 print("Skipped {0}".format(x))
         except Exception as e:
             print("ERROR: " + str(e))
-    c.timer.print_elapsed("Completed processing of {0}".format(fileName))
+    c.timer.print_elapsed("Completed processing of {0}".format(instrumentName))
 
     numCompleted+=1
 ### END part where to write every Future value and Feature, day by day and intrument by instrument to .txt file to read csv style. 
         
-c.timer.print_elapsed('Completed preprocessing {0} files with ticker data ({1} failed) from {2}'.format(numCompleted, numFailed, path))
+c.timer.print_elapsed('Completed preprocessing {0} files with ticker data ({1} failed) from {2}'.format(numCompleted, numFailed, instrumentPath))
