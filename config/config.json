@@ -1,6 +1,11 @@
 {
+  "root": "c:\\Documents\\ImundboQuant",
+  "preProcess": {
+    "folder": "PreProcess",
+    "instrumentsFolder": "Instrument_FX30",
+    "featuresFile": "MASSIVE_IQ19p_535ft.txt"
+  },
   "paths": {
-    "root": "c:\\Documents\\ImundboQuant",
     "features": {
       "folder": "features",
       "filePrefix": "FX30_IQ19p"
@@ -20,15 +25,15 @@
     "numFeatures": 8
   },
   "classifiers": {
-    "randomForest": {         
-      "n_estimators": 150,    
+    "randomForest": {
+      "n_estimators": 150,
       "max_features": null,
       "max_depth": 150,
       "min_samples_split": 150,
-      "min_samples_leaf": 50, 
-      "max_leaf_nodes": 10000, 
+      "min_samples_leaf": 50,
+      "max_leaf_nodes": 10000,
       "n_jobs": -1,
-      "random_state": 42      
+      "random_state": 42
     }
   }
 
