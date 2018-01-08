@@ -1474,10 +1474,10 @@ def makeForecast(inputList):
             df.to_excel(FileLocation4excel, index=False)
             #print(df)
     except Exception as e:
-        print(str(e))
+        print("Exception before saving excel: " + str(e))
         pass
 
-    c.timer.print_elapsed("Finished computing features and priming files")
+    c.timer.print_elapsed("\nFinished computing features and priming files")
 ###################################################################3    
 
 
@@ -1527,6 +1527,7 @@ def makeForecast(inputList):
             Location = importantPath+'\\for'+eachTicker+'_excel.xlsx'
             print("Reading {0}".format(Location))
             data = pd.read_excel(Location)
+
             feat01 = np.array(data[FEATURES01].values) # making a Numpay array from the Pandas dataset
             feat02 = np.array(data[FEATURES02].values) # making a Numpay array from the Pandas dataset
             feat03 = np.array(data[FEATURES03].values) # making a Numpay array from the Pandas dataset
@@ -1561,7 +1562,7 @@ def makeForecast(inputList):
             print("Finished reading {0} and converting to arrays".format(Location))
             
         except Exception as e:
-            print("Error reading xlsx:" + str(e))    
+            print("Error reading xlsx: " + str(e))    
 
 ##########################################################################
         try:
@@ -1585,8 +1586,8 @@ def makeForecast(inputList):
                     #print(index)
                     #print(type(feat))
 
-
             Value_01 = logreg_01.predict_proba(feat01)
+
             _01N5 = round(Value_01[0][0],6)
             _01N4 = round(Value_01[0][1],6)
             _01N3 = round(Value_01[0][2],6)
@@ -2079,10 +2080,10 @@ def main():
  |  _| (_) | | |  __/ (_| (_| \__ \ ||  __/ |   
  |_|  \___/|_|  \___|\___\__,_|___/\__\___|_|   
 
-                                                """)
+""")
 
 
-    numIterations = 10
+    numIterations = 100
 
     for i in range(1, numIterations + 1):
         c.timer.print_elapsed("Starting iteration {0} / {1}".format(i, numIterations))
@@ -2098,7 +2099,7 @@ def main():
             
             print("Timestamp of run: {0}".format(timestamp))
 
-            c.timer.print_elapsed("\nIteration {0} finished, sleeping 30 minutes".format(i))
+            c.timer.print_elapsed("\nIteration {0} / {1} finished, sleeping 30 minutes".format(i, numIterations))
 
             time.sleep(1800)
         else:
