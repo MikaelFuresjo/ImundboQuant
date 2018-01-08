@@ -38,6 +38,7 @@ from matplotlib.dates import date2num
 
 from config.IQConfig import IQConfig
 import indicators.Custom
+import indicators.Date
 from gui.console import Console
 
 c = Console(
@@ -196,7 +197,7 @@ for index, instrument in enumerate(instruments):
                     try:
                         msLowerBound = 5
                         msUpperBound = 34
-                        msTimeframes = range(msLowerBound, msUpperBound)
+                        msTimeframes = range(msLowerBound, msUpperBound+1)
                         miniSharps = list(map(lambda timeFrame:indicators.Custom.miniSharp(data, x, timeFrame), msTimeframes))
 
 
@@ -484,7 +485,7 @@ for index, instrument in enumerate(instruments):
                     try:
                         psLowerBound = 6
                         psUpperBound = 34
-                        psTimeframes = range(msLowerBound, msUpperBound)
+                        psTimeframes = range(msLowerBound, msUpperBound+1)
                         pastSharps = list(map(lambda timeFrame:indicators.Custom.pastSharp(data, x, timeFrame), msTimeframes))
 
 
@@ -512,81 +513,21 @@ for index, instrument in enumerate(instruments):
 
                    
                     #part with date related Features
-                    _Diff_CtoH = np.round((Close[x]-High[x])/High[x],3)
-                    _Diff_CtoH1 = np.round((Close[x]-High[x-1])/High[x-1],3)
-                    _Diff_CtoH2 = np.round((Close[x]-High[x-2])/High[x-2],3)
-                    _Diff_CtoH3 = np.round((Close[x]-High[x-3])/High[x-3],3)
-                    _Diff_CtoH4 = np.round((Close[x]-High[x-4])/High[x-4],3)
-                    _Diff_CtoH5 = np.round((Close[x]-High[x-5])/High[x-5],3)
-                    _Diff_CtoH6 = np.round((Close[x]-High[x-6])/High[x-6],3)
-                    _Diff_CtoH7 = np.round((Close[x]-High[x-7])/High[x-7],3)
-                    _Diff_CtoH8 = np.round((Close[x]-High[x-8])/High[x-8],3)
-                    _Diff_CtoH9 = np.round((Close[x]-High[x-9])/High[x-9],3)
-                    _Diff_CtoH10 = np.round((Close[x]-High[x-10])/High[x-10],3)
-                    _Diff_CtoH11 = np.round((Close[x]-High[x-11])/High[x-11],3)
-                    _Diff_CtoH12 = np.round((Close[x]-High[x-12])/High[x-12],3)
-                    _Diff_CtoH13 = np.round((Close[x]-High[x-13])/High[x-13],3)
-                    _Diff_CtoH14 = np.round((Close[x]-High[x-14])/High[x-14],3)
-                    _Diff_CtoH15 = np.round((Close[x]-High[x-15])/High[x-15],3)
-                    _Diff_CtoH16 = np.round((Close[x]-High[x-16])/High[x-16],3)
-                    _Diff_CtoH17 = np.round((Close[x]-High[x-17])/High[x-17],3)
-                    _Diff_CtoH18 = np.round((Close[x]-High[x-18])/High[x-18],3)
-                    _Diff_CtoH19 = np.round((Close[x]-High[x-19])/High[x-19],3)
-                    _Diff_CtoH20 = np.round((Close[x]-High[x-20])/High[x-20],3)
-                    _Diff_CtoH21 = np.round((Close[x]-High[x-21])/High[x-21],3)
-                    _Diff_CtoH22 = np.round((Close[x]-High[x-22])/High[x-22],3)
-                    _Diff_CtoH23 = np.round((Close[x]-High[x-23])/High[x-23],3)
-                    _Diff_CtoH24 = np.round((Close[x]-High[x-24])/High[x-24],3)
-                    _Diff_CtoH25 = np.round((Close[x]-High[x-25])/High[x-25],3)
-                    _Diff_CtoL = np.round((Close[x]-Low[x])/Low[x],3)
-                    _Diff_CtoL1 = np.round((Close[x]-Low[x-1])/Low[x-1],3)
-                    _Diff_CtoL2 = np.round((Close[x]-Low[x-2])/Low[x-2],3)
-                    _Diff_CtoL3 = np.round((Close[x]-Low[x-3])/Low[x-3],3)
-                    _Diff_CtoL4 = np.round((Close[x]-Low[x-4])/Low[x-4],3)
-                    _Diff_CtoL5 = np.round((Close[x]-Low[x-5])/Low[x-5],3)
-                    _Diff_CtoL6 = np.round((Close[x]-Low[x-6])/Low[x-6],3)
-                    _Diff_CtoL7 = np.round((Close[x]-Low[x-7])/Low[x-7],3)
-                    _Diff_CtoL8 = np.round((Close[x]-Low[x-8])/Low[x-8],3)
-                    _Diff_CtoL9 = np.round((Close[x]-Low[x-9])/Low[x-9],3)
-                    _Diff_CtoL10 = np.round((Close[x]-Low[x-10])/Low[x-10],3)
-                    _Diff_CtoL11 = np.round((Close[x]-Low[x-11])/Low[x-11],3)
-                    _Diff_CtoL12 = np.round((Close[x]-Low[x-12])/Low[x-12],3)
-                    _Diff_CtoL13 = np.round((Close[x]-Low[x-13])/Low[x-13],3)
-                    _Diff_CtoL14 = np.round((Close[x]-Low[x-14])/Low[x-14],3)
-                    _Diff_CtoL15 = np.round((Close[x]-Low[x-15])/Low[x-15],3)
-                    _Diff_CtoL16 = np.round((Close[x]-Low[x-16])/Low[x-16],3)
-                    _Diff_CtoL17 = np.round((Close[x]-Low[x-17])/Low[x-17],3)
-                    _Diff_CtoL18 = np.round((Close[x]-Low[x-18])/Low[x-18],3)
-                    _Diff_CtoL19 = np.round((Close[x]-Low[x-19])/Low[x-19],3)
-                    _Diff_CtoL20 = np.round((Close[x]-Low[x-20])/Low[x-20],3)
-                    _Diff_CtoL21 = np.round((Close[x]-Low[x-21])/Low[x-21],3)
-                    _Diff_CtoL22 = np.round((Close[x]-Low[x-22])/Low[x-22],3)
-                    _Diff_CtoL23 = np.round((Close[x]-Low[x-23])/Low[x-23],3)
-                    _Diff_CtoL24 = np.round((Close[x]-Low[x-24])/Low[x-24],3)
-                    _Diff_CtoL25 = np.round((Close[x]-Low[x-25])/Low[x-25],3)
-    
-                    _Diff_CtoO = np.round((Close[x]-Open[x])/Open[x],3)
-                    _Diff_CtoO1 = np.round((Close[x]-Open[x-1])/Open[x-1],3)
-                    _Diff_CtoO2 = np.round((Close[x]-Open[x-2])/Open[x-2],3)
-                    _Diff_CtoO3 = np.round((Close[x]-Open[x-3])/Open[x-3],3)
-                    _Diff_CtoO4 = np.round((Close[x]-Open[x-4])/Open[x-4],3)
-                    _Diff_CtoO5 = np.round((Close[x]-Open[x-5])/Open[x-5],3)
-                    _Diff_CtoO6 = np.round((Close[x]-Open[x-6])/Open[x-6],3)
-                    _Diff_CtoO7 = np.round((Close[x]-Open[x-7])/Open[x-7],3)
-                    _Diff_CtoO8 = np.round((Close[x]-Open[x-8])/Open[x-8],3)
-                    _Diff_CtoO9 = np.round((Close[x]-Open[x-9])/Open[x-9],3)
-    
-    
-                    _Diff_CtoC1 = np.round((Close[x]-Close[x-1])/Close[x-1],3)
-                    _Diff_CtoC2 = np.round((Close[x]-Close[x-2])/Close[x-2],3)
-                    _Diff_CtoC3 = np.round((Close[x]-Close[x-3])/Close[x-3],3)
-                    _Diff_CtoC4 = np.round((Close[x]-Close[x-4])/Close[x-4],3)
-                    _Diff_CtoC5 = np.round((Close[x]-Close[x-5])/Close[x-5],3)
-                    _Diff_CtoC6 = np.round((Close[x]-Close[x-6])/Close[x-6],3)
-                    _Diff_CtoC7 = np.round((Close[x]-Close[x-7])/Close[x-7],3)
-                    _Diff_CtoC8 = np.round((Close[x]-Close[x-8])/Close[x-8],3)
-                    _Diff_CtoC9 = np.round((Close[x]-Close[x-9])/Close[x-9],3)            
-    
+                    diffLowerBound = 0
+                    diffUpperBound = 25
+                    diffTimeframes = range(diffLowerBound, diffUpperBound+1)
+
+                    diffCtoHs = list(map(lambda timeFrame:indicators.Date.diffCtoH(data, x, timeFrame), diffTimeframes))
+                    diffCtoLs = list(map(lambda timeFrame:indicators.Date.diffCtoL(data, x, timeFrame), diffTimeframes))
+
+                    diffLowerBound = 0
+                    diffUpperBound = 9
+                    diffTimeframes = range(diffLowerBound, diffUpperBound+1)
+
+                    diffCtoOs = list(map(lambda timeFrame:indicators.Date.diffCtoO(data, x, timeFrame), diffTimeframes))
+                    diffCtoCs = list(map(lambda timeFrame:indicators.Date.diffCtoC(data, x, timeFrame), diffTimeframes)) # index 0 not used
+
+
                     _SMA_H3 = np.round(np.sum(High[x-4:x+1])/5,4)
                     _SMA_L3 = np.round(np.sum(Low[x-4:x+1])/5,4)
                 
@@ -1294,7 +1235,9 @@ for index, instrument in enumerate(instruments):
                     _Return34 = np.round((Close[x+34]-Close[x])/Close[x],4)
 
                 except Exception as e:
-                    print("ERROR: " + str(e))
+                        print("Error calculating lots for {0} date {1} row {2}".format(instrument, dt, x))
+                        traceback.print_exc
+                        raise
             
                 ### END calculation of choosen list of FEATURES for the MACHINE LEARNING process ###            
             
@@ -1329,77 +1272,77 @@ for index, instrument in enumerate(instruments):
                             str(_PastSCH13to21) + ',' +
                             str(_PastSCH13to34) + ',' +
                             str(_PastSCH21to34) + ',' +
-                            str(_Diff_CtoH) + ',' +
-                            str(_Diff_CtoH1) + ',' +
-                            str(_Diff_CtoH2) + ',' +
-                            str(_Diff_CtoH3) + ',' +
-                            str(_Diff_CtoH4) + ',' +
-                            str(_Diff_CtoH5) + ',' +
-                            str(_Diff_CtoH6) + ',' +
-                            str(_Diff_CtoH7) + ',' +
-                            str(_Diff_CtoH8) + ',' +
-                            str(_Diff_CtoH9) + ',' +
-                            str(_Diff_CtoH10) + ',' +
-                            str(_Diff_CtoH11) + ',' +
-                            str(_Diff_CtoH12) + ',' +
-                            str(_Diff_CtoH13) + ',' +
-                            str(_Diff_CtoH14) + ',' +
-                            str(_Diff_CtoH15) + ',' +
-                            str(_Diff_CtoH16) + ',' +
-                            str(_Diff_CtoH17) + ',' +
-                            str(_Diff_CtoH18) + ',' +
-                            str(_Diff_CtoH19) + ',' +
-                            str(_Diff_CtoH20) + ',' +
-                            str(_Diff_CtoH21) + ',' +
-                            str(_Diff_CtoH22) + ',' +
-                            str(_Diff_CtoH23) + ',' +
-                            str(_Diff_CtoH24) + ',' +
-                            str(_Diff_CtoH25) + ',' +
-                            str(_Diff_CtoL) + ',' +
-                            str(_Diff_CtoL1) + ',' +
-                            str(_Diff_CtoL2) + ',' +
-                            str(_Diff_CtoL3) + ',' +
-                            str(_Diff_CtoL4) + ',' +
-                            str(_Diff_CtoL5) + ',' +
-                            str(_Diff_CtoL6) + ',' +
-                            str(_Diff_CtoL7) + ',' +
-                            str(_Diff_CtoL8) + ',' +
-                            str(_Diff_CtoL9) + ',' +
-                            str(_Diff_CtoL10) + ',' +
-                            str(_Diff_CtoL11) + ',' +
-                            str(_Diff_CtoL12) + ',' +
-                            str(_Diff_CtoL13) + ',' +
-                            str(_Diff_CtoL14) + ',' +
-                            str(_Diff_CtoL15) + ',' +
-                            str(_Diff_CtoL16) + ',' +
-                            str(_Diff_CtoL17) + ',' +
-                            str(_Diff_CtoL18) + ',' +
-                            str(_Diff_CtoL19) + ',' +
-                            str(_Diff_CtoL20) + ',' +
-                            str(_Diff_CtoL21) + ',' +
-                            str(_Diff_CtoL22) + ',' +
-                            str(_Diff_CtoL23) + ',' +
-                            str(_Diff_CtoL24) + ',' +
-                            str(_Diff_CtoL25) + ',' +
-                            str(_Diff_CtoO) + ',' +
-                            str(_Diff_CtoO1) + ',' +
-                            str(_Diff_CtoO2) + ',' +
-                            str(_Diff_CtoO3) + ',' +
-                            str(_Diff_CtoO4) + ',' +
-                            str(_Diff_CtoO5) + ',' +
-                            str(_Diff_CtoO6) + ',' +
-                            str(_Diff_CtoO7) + ',' +
-                            str(_Diff_CtoO8) + ',' +
-                            str(_Diff_CtoO9) + ',' +
-                            str(_Diff_CtoC1) + ',' +
-                            str(_Diff_CtoC2) + ',' +
-                            str(_Diff_CtoC3) + ',' +
-                            str(_Diff_CtoC4) + ',' +
-                            str(_Diff_CtoC5) + ',' +
-                            str(_Diff_CtoC6) + ',' +
-                            str(_Diff_CtoC7) + ',' +
-                            str(_Diff_CtoC8) + ',' +
-                            str(_Diff_CtoC9) + ',' +
+                            str(diffCtoHs[0]) + ',' +
+                            str(diffCtoHs[1]) + ',' +
+                            str(diffCtoHs[2]) + ',' +
+                            str(diffCtoHs[3]) + ',' +
+                            str(diffCtoHs[4]) + ',' +
+                            str(diffCtoHs[5]) + ',' +
+                            str(diffCtoHs[6]) + ',' +
+                            str(diffCtoHs[7]) + ',' +
+                            str(diffCtoHs[8]) + ',' +
+                            str(diffCtoHs[9]) + ',' +
+                            str(diffCtoHs[10]) + ',' +
+                            str(diffCtoHs[11]) + ',' +
+                            str(diffCtoHs[12]) + ',' +
+                            str(diffCtoHs[13]) + ',' +
+                            str(diffCtoHs[14]) + ',' +
+                            str(diffCtoHs[15]) + ',' +
+                            str(diffCtoHs[16]) + ',' +
+                            str(diffCtoHs[17]) + ',' +
+                            str(diffCtoHs[18]) + ',' +
+                            str(diffCtoHs[19]) + ',' +
+                            str(diffCtoHs[20]) + ',' +
+                            str(diffCtoHs[21]) + ',' +
+                            str(diffCtoHs[22]) + ',' +
+                            str(diffCtoHs[23]) + ',' +
+                            str(diffCtoHs[24]) + ',' +
+                            str(diffCtoHs[25]) + ',' +
+                            str(diffCtoLs[0]) + ',' +
+                            str(diffCtoLs[1]) + ',' +
+                            str(diffCtoLs[2]) + ',' +
+                            str(diffCtoLs[3]) + ',' +
+                            str(diffCtoLs[4]) + ',' +
+                            str(diffCtoLs[5]) + ',' +
+                            str(diffCtoLs[6]) + ',' +
+                            str(diffCtoLs[7]) + ',' +
+                            str(diffCtoLs[8]) + ',' +
+                            str(diffCtoLs[9]) + ',' +
+                            str(diffCtoLs[10]) + ',' +
+                            str(diffCtoLs[11]) + ',' +
+                            str(diffCtoLs[12]) + ',' +
+                            str(diffCtoLs[13]) + ',' +
+                            str(diffCtoLs[14]) + ',' +
+                            str(diffCtoLs[15]) + ',' +
+                            str(diffCtoLs[16]) + ',' +
+                            str(diffCtoLs[17]) + ',' +
+                            str(diffCtoLs[18]) + ',' +
+                            str(diffCtoLs[19]) + ',' +
+                            str(diffCtoLs[20]) + ',' +
+                            str(diffCtoLs[21]) + ',' +
+                            str(diffCtoLs[22]) + ',' +
+                            str(diffCtoLs[23]) + ',' +
+                            str(diffCtoLs[24]) + ',' +
+                            str(diffCtoLs[25]) + ',' +
+                            str(diffCtoOs[0]) + ',' +
+                            str(diffCtoOs[1]) + ',' +
+                            str(diffCtoOs[2]) + ',' +
+                            str(diffCtoOs[3]) + ',' +
+                            str(diffCtoOs[4]) + ',' +
+                            str(diffCtoOs[5]) + ',' +
+                            str(diffCtoOs[6]) + ',' +
+                            str(diffCtoOs[7]) + ',' +
+                            str(diffCtoOs[8]) + ',' +
+                            str(diffCtoOs[9]) + ',' +
+                            str(diffCtoCs[1]) + ',' +
+                            str(diffCtoCs[2]) + ',' +
+                            str(diffCtoCs[3]) + ',' +
+                            str(diffCtoCs[4]) + ',' +
+                            str(diffCtoCs[5]) + ',' +
+                            str(diffCtoCs[6]) + ',' +
+                            str(diffCtoCs[7]) + ',' +
+                            str(diffCtoCs[8]) + ',' +
+                            str(diffCtoCs[9]) + ',' +
                             str(_SMA_H3) + ',' +
                             str(_SMA_L3) + ',' +
                             str(_BBU3) + ',' +
@@ -1861,8 +1804,9 @@ for index, instrument in enumerate(instruments):
             else:
                 print("Skipped {0}".format(x))
         except Exception as e:
-            print("ERROR: " + str(e))
-    print("Appended lines of features to {}".format(LocationToSave))
+            print("Error for {0} date {1} row {2}".format(instrument, dt, x))
+            traceback.print_exc
+            raise
     c.timer.print_elapsed("Completed processing of {0}".format(instrumentName))
 
     numCompleted+=1
