@@ -33,9 +33,11 @@ import os
 import csv
 from datetime import datetime
 import sys
+import traceback
 from matplotlib.dates import date2num
 
 from config.IQConfig import IQConfig
+import indicators.Custom
 from gui.console import Console
 
 c = Console(
@@ -53,6 +55,8 @@ c = Console(
  ["Date", "Open", "High", "Low", "Close", "Volume", "OI"]
 
 """)
+
+
 
 # Settings are kept in config/config.json
 #########################################
@@ -163,7 +167,7 @@ for index, instrument in enumerate(instruments):
     try:
         data = pd.read_csv(instrumentPath, parse_dates=['Date'], header=None, names=["Date", "Open", "High", "Low", "Close", "Volume", "OI"])
         Date, Open, High, Low, Close, Volume, OI = data.values.T
-        #Date = date2num(Date) #Todo: Remove this and keep native Datetime
+
     except Exception as e:
         numFailed+=1
         print("Error processing {0}: {1}. Skipping".format(instrument, e))
@@ -177,9 +181,9 @@ for index, instrument in enumerate(instruments):
     # skip the last 35 days for making space for P/L calculation for at most 34 days
     # skip the last 400 days for making space to calculate indicatiors that need 377 past days
     for x in range(400, numDates-35): 
+        row = data.iloc[[x]]
 
-        
-### START First part -  calculate on how high the Risk/Reward Ratio is for future move in 1,2,3,5,8,13,21 days 
+### START First paruitt -  calculate on how high the Risk/Reward Ratio is for future move in 1,2,3,5,8,13,21 days 
         try:
             # Without splitting columns (... = data.values.T above) we could iterate actual rows in the pandas dataframe and use for example row["Date"] instead
             dt = Date[x]
@@ -189,553 +193,38 @@ for index, instrument in enumerate(instruments):
         
             if _dateYear > 1966 and (_dateMonthOfYear >0 or _dateMonthOfYear >0 or _dateMonthOfYear >0 ):
                 try:            
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+6])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+6])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_05 = np.round(_KeyValueLong - _KeyValueShort,6)
+                    try:
+                        msLowerBound = 5
+                        msUpperBound = 34
+                        msTimeframes = range(msLowerBound, msUpperBound)
+                        miniSharps = list(map(lambda timeFrame:indicators.Custom.miniSharp(data, x, timeFrame), msTimeframes))
+
+
+                        def getMiniSharpAverage(timeframeStart, timeframeStop):
+                            return np.average(miniSharps[timeframeStart-msLowerBound: timeframeStop-msLowerBound])
+
+                        _MiniSCH05to08 = getMiniSharpAverage(5, 8)
+                        _MiniSCH05to13 = getMiniSharpAverage(5, 13)
+                        _MiniSCH05to21 = getMiniSharpAverage(5, 21)
+                        _MiniSCH05to34 = getMiniSharpAverage(5, 34)
+
+                        _MiniSCH08to13 = getMiniSharpAverage(8, 13)
+                        _MiniSCH08to21 = getMiniSharpAverage(8, 21)
+                        _MiniSCH08to34 = getMiniSharpAverage(8, 34)
+                    
+                        _MiniSCH13to21 = getMiniSharpAverage(13, 21)
+                        _MiniSCH13to34 = getMiniSharpAverage(13, 34)
+
+                        _MiniSCH21to34 = getMiniSharpAverage(21, 34)
+
+                                                
                     except Exception as e:
-                        pass
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+7])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+7])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_06 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
+                        print("Error calculating miniSharp for {0} date {1} row {2}".format(instrument, dt, x))
+                        traceback.print_exc
+                        raise
 
 
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+8])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+8])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_07 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
 
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+9])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+9])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_08 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+10])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+10])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_09 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+11])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+11])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_10 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+12])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+12])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_11 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+13])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+13])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_12 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-    
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+14])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+14])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_13 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+15])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+15])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_14 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+16])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+16])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_15 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+17])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+17])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_16 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+18])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+18])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_17 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+19])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+19])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_18 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+20])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+20])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_19 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+21])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+21])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_20 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-    
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+22])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+22])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_21 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+23])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+23])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_22 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+24])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+24])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_23 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+25])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+25])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_24 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+26])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+26])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_25 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+27])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+27])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_26 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+28])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+28])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_27 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+29])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+29])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_28 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+30])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+30])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_29 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+31])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+31])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_30 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+32])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+32])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_31 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+33])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+33])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_32 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+34])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+34])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_33 = np.round(_KeyValueLong - _KeyValueShort,6)
-                    except Exception as e:
-                        pass
-    
-                    try:            
-                        _Diff_CpLf = (np.amin(Low[x:x+35])-Close[x])/Close[x]
-                        _Diff_CpHf = (np.amax(High[x:x+35])-Close[x])/Close[x]
-                        _CpHf_Less_CpLf = _Diff_CpHf - _Diff_CpLf
-                        _ABSofDiff_CpLf = abs(_Diff_CpLf)
-                        _ABSofDiff_CpHf = abs(_Diff_CpHf)
-                        _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
-                        _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                        _MiniSharp_34 = np.round(_KeyValueLong - _KeyValueShort,6)
-     
-                    except Exception as e:
-                        pass
-
-
-                    _MiniSCH05to08 = (
-                                        _MiniSharp_05 +
-                                        _MiniSharp_06 +
-                                        _MiniSharp_07 +
-                                        _MiniSharp_08
-                                        )/4
-
-                    _MiniSCH05to13 = (
-                                        _MiniSharp_05 +
-                                        _MiniSharp_06 +
-                                        _MiniSharp_07 +
-                                        _MiniSharp_08 +
-                                        _MiniSharp_09 +
-                                        _MiniSharp_10 +
-                                        _MiniSharp_11 +
-                                        _MiniSharp_12 +
-                                        _MiniSharp_13
-                                        )/9
-
-                    _MiniSCH05to21 = (
-                                        _MiniSharp_05 +
-                                        _MiniSharp_06 +
-                                        _MiniSharp_07 +
-                                        _MiniSharp_08 +
-                                        _MiniSharp_09 +
-                                        _MiniSharp_10 +
-                                        _MiniSharp_11 +
-                                        _MiniSharp_12 +
-                                        _MiniSharp_13 +
-                                        _MiniSharp_14 +
-                                        _MiniSharp_15 +
-                                        _MiniSharp_16 +
-                                        _MiniSharp_17 +
-                                        _MiniSharp_18 +
-                                        _MiniSharp_19 +
-                                        _MiniSharp_20 +
-                                        _MiniSharp_21
-                                        )/17
-
-                    _MiniSCH05to34 = (
-                                        _MiniSharp_05 +
-                                        _MiniSharp_06 +
-                                        _MiniSharp_07 +
-                                        _MiniSharp_08 +
-                                        _MiniSharp_09 +
-                                        _MiniSharp_10 +
-                                        _MiniSharp_11 +
-                                        _MiniSharp_12 +
-                                        _MiniSharp_13 +
-                                        _MiniSharp_14 +
-                                        _MiniSharp_15 +
-                                        _MiniSharp_16 +
-                                        _MiniSharp_17 +
-                                        _MiniSharp_18 +
-                                        _MiniSharp_19 +
-                                        _MiniSharp_20 +
-                                        _MiniSharp_21 +
-                                        _MiniSharp_22 +
-                                        _MiniSharp_23 +
-                                        _MiniSharp_24 +
-                                        _MiniSharp_25 +
-                                        _MiniSharp_26 +
-                                        _MiniSharp_27 +
-                                        _MiniSharp_28 +
-                                        _MiniSharp_29 +
-                                        _MiniSharp_30 +
-                                        _MiniSharp_31 +
-                                        _MiniSharp_32 +
-                                        _MiniSharp_33 +
-                                        _MiniSharp_34
-                                        )/30
-
-                    _MiniSCH08to13 = (
-                                        _MiniSharp_08 +
-                                        _MiniSharp_09 +
-                                        _MiniSharp_10 +
-                                        _MiniSharp_11 +
-                                        _MiniSharp_12 +
-                                        _MiniSharp_13
-                                        )/6
-
-
-                    _MiniSCH08to21 = (
-                                        _MiniSharp_08 +
-                                        _MiniSharp_09 +
-                                        _MiniSharp_10 +
-                                        _MiniSharp_11 +
-                                        _MiniSharp_12 +
-                                        _MiniSharp_13 +
-                                        _MiniSharp_14 +
-                                        _MiniSharp_15 +
-                                        _MiniSharp_16 +
-                                        _MiniSharp_17 +
-                                        _MiniSharp_18 +
-                                        _MiniSharp_19 +
-                                        _MiniSharp_20 +
-                                        _MiniSharp_21
-                                        )/14
-
-
-                    _MiniSCH08to34 = (
-                                        _MiniSharp_08 +
-                                        _MiniSharp_09 +
-                                        _MiniSharp_10 +
-                                        _MiniSharp_11 +
-                                        _MiniSharp_12 +
-                                        _MiniSharp_13 +
-                                        _MiniSharp_14 +
-                                        _MiniSharp_15 +
-                                        _MiniSharp_16 +
-                                        _MiniSharp_17 +
-                                        _MiniSharp_18 +
-                                        _MiniSharp_19 +
-                                        _MiniSharp_20 +
-                                        _MiniSharp_21 +
-                                        _MiniSharp_22 +
-                                        _MiniSharp_23 +
-                                        _MiniSharp_24 +
-                                        _MiniSharp_25 +
-                                        _MiniSharp_26 +
-                                        _MiniSharp_27 +
-                                        _MiniSharp_28 +
-                                        _MiniSharp_29 +
-                                        _MiniSharp_30 +
-                                        _MiniSharp_31 +
-                                        _MiniSharp_32 +
-                                        _MiniSharp_33 +
-                                        _MiniSharp_34
-                                        )/27
-
-                    _MiniSCH13to21 = (
-                                        _MiniSharp_13 +
-                                        _MiniSharp_14 +
-                                        _MiniSharp_15 +
-                                        _MiniSharp_16 +
-                                        _MiniSharp_17 +
-                                        _MiniSharp_18 +
-                                        _MiniSharp_19 +
-                                        _MiniSharp_20 +
-                                        _MiniSharp_21
-                                        )/9
-
-
-                    _MiniSCH13to34 = (
-                                        _MiniSharp_13 +
-                                        _MiniSharp_14 +
-                                        _MiniSharp_15 +
-                                        _MiniSharp_16 +
-                                        _MiniSharp_17 +
-                                        _MiniSharp_18 +
-                                        _MiniSharp_19 +
-                                        _MiniSharp_20 +
-                                        _MiniSharp_21 +
-                                        _MiniSharp_22 +
-                                        _MiniSharp_23 +
-                                        _MiniSharp_24 +
-                                        _MiniSharp_25 +
-                                        _MiniSharp_26 +
-                                        _MiniSharp_27 +
-                                        _MiniSharp_28 +
-                                        _MiniSharp_29 +
-                                        _MiniSharp_30 +
-                                        _MiniSharp_31 +
-                                        _MiniSharp_32 +
-                                        _MiniSharp_33 +
-                                        _MiniSharp_34
-                                        )/22
-
-                    _MiniSCH21to34 = (
-                                        _MiniSharp_21 +
-                                        _MiniSharp_22 +
-                                        _MiniSharp_23 +
-                                        _MiniSharp_24 +
-                                        _MiniSharp_25 +
-                                        _MiniSharp_26 +
-                                        _MiniSharp_27 +
-                                        _MiniSharp_28 +
-                                        _MiniSharp_29 +
-                                        _MiniSharp_30 +
-                                        _MiniSharp_31 +
-                                        _MiniSharp_32 +
-                                        _MiniSharp_33 +
-                                        _MiniSharp_34
-                                        )/14
-                                    
         ####################################################
 
                     SCH_Dxxp5 = 0.7851
@@ -986,7 +475,7 @@ for index, instrument in enumerate(instruments):
                     
         ### START calculation of choosen list of FEATURES for the MACHINE LEARNING process ###          
                     #Get Date info from .txt file and convet it to string format
-    
+
                     _justOpen = float(Open[x])
                     _justHigh = float(High[x])
                     _justLow = float(Low[x])
