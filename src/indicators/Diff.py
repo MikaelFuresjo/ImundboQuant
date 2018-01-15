@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Callable, Dict
 
+from utils.CustomTypes import TColumnName, TFeatureLambda, TFeatureLambdasDict
 from utils.Utils import columnName
 
 def getDiffFeatures() -> Dict[str, Callable[[pd.DataFrame, pd.DataFrame], None]]:
@@ -12,12 +13,6 @@ def getDiffFeatures() -> Dict[str, Callable[[pd.DataFrame, pd.DataFrame], None]]
 
     diffFeatures = {}
 
-    r = range(0, 25+1)
-    diffFeatures.update([columnName("diffCtoH", i), CtoH(i)] for i in r)
-    diffFeatures.update([columnName("diffCtoL", i), CtoL(i)] for i in r)
-    diffFeatures.update([columnName("diffCtoO", i), CtoO(i)] for i in r)
-    r = range(1, 25+1)
-    diffFeatures.update([columnName("diffCtoC", i), CtoC(i)] for i in r)
     
     return diffFeatures
 
@@ -29,31 +24,31 @@ def diffGeneric(colFrom: str, colTo: str, period: int) -> Callable[[pd.DataFrame
     return diffGenericLambda
 
 
-def CtoH(period: int) -> np.array:
+def CtoH(period: int) -> TFeatureLambdasDict:
     """Calculate Difference Close to High[-period] 
     Will use data rows [row] and [row-period]
     """
-    return diffGeneric("Close", "High", period)
+    return {columnName("diffCtoH", period): diffGeneric("Close", "High", period)}
 
 
-def CtoL(period: int) -> np.array:
+def CtoL(period: int) -> TFeatureLambdasDict:
     """Calculate Difference Close to Low[-period]
     Will use data rows [row] and [row-period]
     """
-    return diffGeneric("Close", "Low", period)
+    return {columnName("diffCtoL", period): diffGeneric("Close", "Low", period)}
 
 
-def CtoO(period: int):
+def CtoO(period: int) -> TFeatureLambdasDict:
     """Calculate Difference Close to Open[-period]
     Will use data rows [row] and [row-period]
     """
-    return diffGeneric("Close", "Open", period)
+    return {columnName("diffCtoO", period): diffGeneric("Close", "Open", period)}
 
 
-def CtoC(period: int):
+def CtoC(period: int) -> TFeatureLambdasDict:
     """Calculate Difference Close to Close[-period]
     Will use data rows [row] and [row-period]
     """
-    return diffGeneric("Close", "Close", period)
+    return {columnName("diffCtoH", period): diffGeneric("Close", "Close", period)}
 
 

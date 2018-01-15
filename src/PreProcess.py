@@ -38,6 +38,7 @@ import sys
 import traceback
 
 from config.IQConfig import IQConfig
+import feature_sets.Original
 import indicators.Custom
 import indicators.Date
 import indicators.Diff
@@ -45,6 +46,7 @@ import indicators.Famous
 import indicators.Rolling
 from gui.console import Console
 from utils.Utils import columnName, applyFeatures
+
 
 c = Console(
 """  ___
@@ -97,11 +99,11 @@ numCompleted = 0
 numFailed = 0
 
 
-featuresToExtract = indicators.Date.getDateFeatures()
-featuresToExtract.update(indicators.Diff.getDiffFeatures())
-featuresToExtract.update(indicators.Custom.getCustomFeatures())
-featuresToExtract.update(indicators.Rolling.getRollingFeatures())
-featuresToExtract.update(indicators.Famous.getFamousFeatures())
+#featuresToExtract = indicators.Date.getDateFeatures()
+#featuresToExtract.update(indicators.Diff.getDiffFeatures())
+#featuresToExtract.update(indicators.Rolling.getRollingFeatures())
+#featuresToExtract.update(indicators.Famous.getFamousFeatures())
+featuresToExtract = feature_sets.Original.getOriginalFeatureSet()
 
 featureColumnNames = []
 for feature, settings in featuresToExtract.items():

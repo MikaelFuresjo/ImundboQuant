@@ -3,7 +3,7 @@
   "preProcess": {
     "folder": "PreProcess",
     "instrumentsFolder": "PreProcess\\Instrument_FX30",
-    "featuresFile": "MASSIVE_IQ19p_535ft.txt"
+    "featuresFile": "MASSIVE_IQ19p_535ft.csv"
   },
   "pickleProducer": {
     "folder": "pickles",
@@ -35,7 +35,7 @@
       "folder": "CrossValidation",
       "fileName": "50kFX30sortDate_535ft.xlsx"
     },
-    "numIterations": 10
+    "numIterations": 1
   },
 
   "paths": {
