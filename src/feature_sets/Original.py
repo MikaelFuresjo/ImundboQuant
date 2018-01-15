@@ -8,8 +8,8 @@ from utils.CustomTypes import TColumnName, TFeatureLambda, TFeatureLambdasDict
 from utils.Utils import columnName
 
 def getOriginalFeatureSet() -> TFeatureLambdasDict:
-    """Get features from original Python 2.7 code
-       NOT COMPLETE YET
+    """Get same features as original "OldPreProcess.py" script
+       NOT COMPLETE
        returns TFeatureLambdasDict
     """
 
@@ -19,10 +19,7 @@ def getOriginalFeatureSet() -> TFeatureLambdasDict:
     features.update(Date.getDateFeatures())
     
     
-    """Get diff-based features
-       Will add lagging diffs CtoX, normally for 0..25
-       returns a dictionary of {columnName: lamda (data, feature): feature }
-    """
+    # Diff-based features
     r = range(0, 25+1)
     [features.update(Diff.CtoH(i)) for i in r]
     [features.update(Diff.CtoL(i)) for i in r]
@@ -35,8 +32,13 @@ def getOriginalFeatureSet() -> TFeatureLambdasDict:
     [features.update(Custom.miniSharp(i)) for i in r] 
     #[features.update(Custom.pastSharp(i)) for i in r]  # Forward-looking
 
-    #featuresToExtract.update(indicators.Rolling.getRollingFeatures())
-    #featuresToExtract.update(indicators.Famous.getFamousFeatures())
+
+    # Rolling
+    [features.update(Rolling.sma(i)) for i in [20, 200]]
+    [features.update(Rolling.ema(i)) for i in [9, 10, 12, 26, 50, 200]]
+    [features.update(Rolling.std(i)) for i in [20]]
+    [features.update(Rolling.max(i)) for i in [3, 5]]
+    [features.update(Rolling.min(i)) for i in [3, 5]]
 
     return features
 

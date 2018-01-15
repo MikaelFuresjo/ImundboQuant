@@ -39,11 +39,12 @@ import traceback
 
 from config.IQConfig import IQConfig
 import feature_sets.Original
-import indicators.Custom
-import indicators.Date
-import indicators.Diff
-import indicators.Famous
-import indicators.Rolling
+import feature_sets.WellKnown
+#import indicators.Custom
+#import indicators.Date
+#import indicators.Diff
+#import indicators.Rolling
+#import indicators.WellKnown
 from gui.console import Console
 from utils.Utils import columnName, applyFeatures
 
@@ -103,7 +104,7 @@ numFailed = 0
 #featuresToExtract.update(indicators.Diff.getDiffFeatures())
 #featuresToExtract.update(indicators.Rolling.getRollingFeatures())
 #featuresToExtract.update(indicators.Famous.getFamousFeatures())
-featuresToExtract = feature_sets.Original.getOriginalFeatureSet()
+featuresToExtract = feature_sets.WellKnown.getWellKnownFeatureSet()
 
 featureColumnNames = []
 for feature, settings in featuresToExtract.items():
@@ -135,11 +136,6 @@ for index, instrument in enumerate(instruments):
     #    #"diffCtoO": range(0, 25+1),  #      Even simple algos should probably be able to combine?
     #    #"diffCtoC": range(1, 25+1),  #      Maybe intraday move n days ago could be interesting as well...
     #
-    #    #"EMA": [12, 26], #MACD
-    #    #"SMA": [20], #BB
-    #    #"STD": [2, 3], #BB
-    #    #https://en.wikipedia.org/wiki/Moment_(mathematics)
-    #    #https://iknowfirst.com/technical-indicators
     #}
 
 
