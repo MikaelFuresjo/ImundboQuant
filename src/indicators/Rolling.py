@@ -22,6 +22,15 @@ def ema(period: int, column: str = "Close"):
     return {columnName("EMA", period): emaLambda}
 
 
+def var(period: int, column: str = "Close"):
+    """Calculate rolling variance (second normalized moment)
+    Will use data rows [row-period:row]
+    """
+    def varLambda(data: pd.DataFrame, features: pd.DataFrame):
+        return data[column].rolling(window=period).var()         # Will return values for early values. min_periods=period-1 changes that
+    return {columnName("VAR", period): varLambda}
+
+
 def std(period: int, column: str = "Close"):
     """Calculate rolling standard deviation
     Will use data rows [row-period:row]
@@ -29,6 +38,22 @@ def std(period: int, column: str = "Close"):
     def stdLambda(data: pd.DataFrame, features: pd.DataFrame):
         return data[column].rolling(window=period).std()         # Will return values for early values. min_periods=period-1 changes that
     return {columnName("STD", period): stdLambda}
+
+def skew(period: int, column: str = "Close"):
+    """Calculate rolling standardized skewness (third normalized moment)
+    Will use data rows [row-period:row]
+    """
+    def skewLambda(data: pd.DataFrame, features: pd.DataFrame):
+        return data[column].rolling_skew(window=period)         # Will return values for early values. min_periods=period-1 changes that
+    return {columnName("SKEW", period): skewLambda}
+
+def kurt(period: int, column: str = "Close"):
+    """Calculate rolling standardized kurtosis (forth normalized moment)
+    Will use data rows [row-period:row]
+    """
+    def kurtLambda(data: pd.DataFrame, features: pd.DataFrame):
+        return data[column].rolling_kurt(window=period)         # Will return values for early values. min_periods=period-1 changes that
+    return {columnName("KURT", period): kurtLambda}
 
 def max(period: int, column: str = "Close"):
     """Calculate rolling max

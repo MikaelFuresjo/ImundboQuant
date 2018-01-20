@@ -28,6 +28,11 @@ def getWellKnownFeatureSet() -> TFeatureLambdasDict:
     
     features.update(WellKnown.rsiOscillator(14))
     
+    features.update(WellKnown.atr(14))
+
+    features.update(WellKnown.parabolicSar())
+
+    features.update(WellKnown.cci())
 
     return features
 

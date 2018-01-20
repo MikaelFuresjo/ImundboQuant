@@ -36,7 +36,6 @@ def bollingerBands(period: int = 20, sigma: int = 2) -> TFeatureLambdasDict:
 
     return features
 
-#    #https://en.wikipedia.org/wiki/Moment_(mathematics)
 #    #https://iknowfirst.com/technical-indicators
 
 def macdOscillator(mediumPeriod: int = 12, longPeriod: int = 26, shortPeriod: int = 9):
@@ -160,3 +159,116 @@ def rsiOscillator(period: int = 14) -> TFeatureLambdasDict:
     })
 
     return features
+
+
+def atr(period: int = 14, close: str = "Close", high: str = "High", low: str = "Low") -> TFeatureLambdasDict:
+    """Calculate Average True Range
+    Based on TR and period
+    Will also add TR (True Range)
+    """
+
+    trName = columnName("TR")
+    atrName = columnName("ATR")
+
+    def trLambda(data: pd.DataFrame, features: pd.DataFrame):
+        closes = data[close]
+        highs = data[high]
+        lows = data[low]
+        closes1 = closes.shift(-1)
+
+        atr1 = highs - lows
+        atr2 = (highs - closes1).abs()
+        atr3 = (closes1 - lows).abs()
+        return np.max([atr1, atr2, atr3], axis=0)
+
+    def atrLambda(data: pd.DataFrame, features: pd.DataFrame):
+        return features[trName].rolling(window = period).mean()
+
+    features: TFeatureLambdasDict = {
+        trName: trLambda,
+        atrName: atrLambda
+    }
+
+    return features
+
+
+def parabolicSar(af: float = 0.02, amax: float = 0.2, highColumn: str = "High", lowColumn: str = "Low") -> TFeatureLambdasDict:
+    """Calculate Parabolic SAR
+    "Stop and Reversal"
+    Iterative implementation
+    """
+
+    psarName = columnName("PSAR")
+
+    def psarLambda(data: pd.DataFrame, features: pd.DataFrame):
+        high = data[highColumn]
+        low = data[lowColumn]
+
+        # Starting values
+        sig0, xpt0, af0 = True, high[0], af
+        sar = [low[0] - (high - low).std()]
+
+        for i in range(1, len(data)):
+            sig1, xpt1, af1 = sig0, xpt0, af0
+
+            lmin = min(low[i - 1], low[i])
+            lmax = max(high[i - 1], high[i])
+
+            if sig1:
+                sig0 = low[i] > sar[-1]
+                xpt0 = max(lmax, xpt1)
+            else:
+                sig0 = high[i] >= sar[-1]
+                xpt0 = min(lmin, xpt1)
+
+            if sig0 == sig1:
+                sari = sar[-1] + (xpt1 - sar[-1])*af1
+                af0 = min(amax, af1 + af)
+
+                if sig0:
+                    af0 = af0 if xpt0 > xpt1 else af1
+                    sari = min(sari, lmin)
+                else:
+                    af0 = af0 if xpt0 < xpt1 else af1
+                    sari = max(sari, lmax)
+            else:
+                af0 = af
+                sari = xpt0
+
+            sar.append(sari)
+
+        return pd.Series(sar, index=data.index)
+
+    features: TFeatureLambdasDict = {
+        psarName: psarLambda
+    }
+
+    return features
+
+
+def cci(period: int = 20, c=0.015, closeCol: str = "Close", highCol: str = "High", lowCol: str = "Low"):
+    """Calculate CCI (Commodity Channel Index)
+    MACD Line = mid (often 12day) EMA – long (often 26day) EMA
+    Signal Line = short (often 9day) EMA of MACD Line
+    The MACD Histogram is the MACD Line – Signal Line
+    Will also add needed EMAs
+    """
+
+    cciName = columnName("CCI", period)
+
+    def cciLambda(data: pd.DataFrame, features: pd.DataFrame):
+        priceMean = data[[highCol, lowCol, closeCol]].mean(axis=1)
+
+        priceMeanAverage = priceMean.rolling(window=period).mean()
+        meanDeviation = (priceMeanAverage - priceMean).abs().rolling(window=period).mean()
+        
+        # mdev = moments.rolling_apply(s, n, lambda x: np.fabs(x - x.mean()).mean())
+
+        return (priceMean - priceMeanAverage)/(c * meanDeviation)
+
+    features: TFeatureLambdasDict = {
+        cciName: cciLambda
+    }
+
+    return features
+
