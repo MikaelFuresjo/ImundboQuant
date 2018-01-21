@@ -36,14 +36,14 @@ TrainLocation = r'C:\Users\UserTrader\Documents\ImundboQuant\InstrumentList\IQ19
 trainData = pd.read_excel(TrainLocation)
 print(trainData)
 
-
+_featureToCheck = "Slump"
 #_featureToCheck = "_Date"
 #_featureToCheck = "_Diff_CtoL"
 #_featureToCheck = "_Diff_CtoH"
 #_featureToCheck = "_Low34_L"
 #_featureToCheck = "_PastSCH05to34"
 #_featureToCheck = "_DiffU34_L3"
-_featureToCheck = "_SMA3_C"
+#_featureToCheck = "_SMA3_C"
 #_featureToCheck = "_SMA89vs144"
 #_featureToCheck = "_DiffD34_C"
 #_featureToCheck = "_Diff_CtoO"
