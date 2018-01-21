@@ -1820,19 +1820,19 @@ for index, instrument in enumerate(instruments):
                     _Perc233_M50 = np.round((Close[x]-np.percentile(High[x-233:x+1],50))/np.percentile(High[x-233:x+1],50),3)
                     _Perc377_M50 = np.round((Close[x]-np.percentile(High[x-377:x+1],50))/np.percentile(High[x-377:x+1],50),3)
     
-                    RL3 = np.round(np.polyfit(Zeros[x-3:x+1], Close[x-3:x+1], 0),3)
-                    RL5 = np.round(np.polyfit(Zeros[x-5:x+1], Close[x-5:x+1], 0),3)
-                    RL8 = np.round(np.polyfit(Zeros[x-8:x+1], Close[x-8:x+1], 0),3)
-                    RL13 = np.round(np.polyfit(Zeros[x-13:x+1], Close[x-13:x+1], 0),3)
-                    RL21 = np.round(np.polyfit(Zeros[x-21:x+1], Close[x-21:x+1], 0),3)
-                    RL34 = np.round(np.polyfit(Zeros[x-34:x+1], Close[x-34:x+1], 0),3)
-                    RL55 = np.round(np.polyfit(Zeros[x-55:x+1], Close[x-55:x+1], 0),3)
-                    RL89 = np.round(np.polyfit(Zeros[x-89:x+1], Close[x-89:x+1], 0),3)
-                    RL100 = np.round(np.polyfit(Zeros[x-100:x+1], Close[x-100:x+1], 0),3)
-                    RL144 = np.round(np.polyfit(Zeros[x-144:x+1], Close[x-144:x+1], 0),3)
-                    RL200 = np.round(np.polyfit(Zeros[x-200:x+1], Close[x-200:x+1], 0),3)
-                    RL233 = np.round(np.polyfit(Zeros[x-233:x+1], Close[x-233:x+1], 0),3)
-                    RL377 = np.round(np.polyfit(Zeros[x-377:x+1], Close[x-377:x+1], 0),3)
+                    RL3 = np.round(np.polyfit(Zeros[x-3:x+1], Close[x-3:x+1], 0),3)[0]
+                    RL5 = np.round(np.polyfit(Zeros[x-5:x+1], Close[x-5:x+1], 0),3)[0]
+                    RL8 = np.round(np.polyfit(Zeros[x-8:x+1], Close[x-8:x+1], 0),3)[0]
+                    RL13 = np.round(np.polyfit(Zeros[x-13:x+1], Close[x-13:x+1], 0),3)[0]
+                    RL21 = np.round(np.polyfit(Zeros[x-21:x+1], Close[x-21:x+1], 0),3)[0]
+                    RL34 = np.round(np.polyfit(Zeros[x-34:x+1], Close[x-34:x+1], 0),3)[0]
+                    RL55 = np.round(np.polyfit(Zeros[x-55:x+1], Close[x-55:x+1], 0),3)[0]
+                    RL89 = np.round(np.polyfit(Zeros[x-89:x+1], Close[x-89:x+1], 0),3)[0]
+                    RL100 = np.round(np.polyfit(Zeros[x-100:x+1], Close[x-100:x+1], 0),3)[0]
+                    RL144 = np.round(np.polyfit(Zeros[x-144:x+1], Close[x-144:x+1], 0),3)[0]
+                    RL200 = np.round(np.polyfit(Zeros[x-200:x+1], Close[x-200:x+1], 0),3)[0]
+                    RL233 = np.round(np.polyfit(Zeros[x-233:x+1], Close[x-233:x+1], 0),3)[0]
+                    RL377 = np.round(np.polyfit(Zeros[x-377:x+1], Close[x-377:x+1], 0),3)[0]
     
                     Diff_C_RL3 = np.round((Close[x]-RL3)/RL3,3)
                     Diff_C_RL5 = np.round((Close[x]-RL5)/RL5,3)
@@ -2891,6 +2891,7 @@ for index, instrument in enumerate(instruments):
                 print("Skipped {0}".format(x))
         except Exception as e:
             print("ERROR: " + str(e))
+    print("Appended lines of features to {}".format(LocationToSave))
     c.timer.print_elapsed("Completed processing of {0}".format(instrumentName))
 
     numCompleted+=1
