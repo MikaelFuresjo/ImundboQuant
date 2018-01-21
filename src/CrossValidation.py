@@ -30,6 +30,7 @@ import numpy as np
 import pandas as pd
 import time
 import random
+import traceback
 
 from config.IQConfig import IQConfig
 from gui.console import Console
@@ -57,9 +58,25 @@ print ('Reading {0:.2f}MB of training data from {1}...'.format(fileSize, TrainLo
 
 
 trainData = pd.read_excel(TrainLocation, parse_dates=['_DateStamp'])
+
+
+print("Dropping rows containing, Inf, -Inf, and NaN...")
+trainData.replace([np.inf, -np.inf], np.nan)
+trainData.dropNA()
+
+# ============ REMOVE ALL BUT 1000 ROWS TO SPEED UP TESTING
+#newNumRows = 10000
+#print("REMOVING ALL BUT {} ROWS (from {}) FOR TRAINING!".format(newNumRows, len(trainData)))
+#trainData = trainData.head(newNumRows)
+# ==== END REMOVE =====
+
 #print(trainData)
 
-c.timer.print_elapsed("Training complete")
+c.timer.print_elapsed("Reading of training data complete")
+
+#print ("\nData types of columns (should normally show floats, ints and one date column only):")
+#print(trainData.dtypes)
+
 
 #_featureToCheck = "_Date"
 #_featureToCheck = "_Diff_CtoL"
@@ -83,7 +100,7 @@ _featureToCheck = "_SMA3_C"
 #_featureToCheck = "_DiffD3_C"
 #_featureToCheck = "Diff_RL3_RL13"
 
-_CV = 60 #USE 60 to slit in to seperate 3M periods or 180 to 1M periods
+_CV = 3 #USE 60 to slit in to seperate 3M periods or 180 to 1M periods
 _fileNameOfResults = os.path.join(config.crossValidation.getTrainingFolder(), 'IQ19p_' + str(_CV) + _featureToCheck + '.txt')   # put in path and filename for results       
 
 
@@ -243,16 +260,20 @@ for countX in range(1, numIterations+1):
                                         max_leaf_nodes=max_leaf_nodes_Rand,
                                         min_samples_split=min_samples_split_Rand,
                                         random_state=42,
-                                        n_jobs=1)
+                                        n_jobs=-1)
 
     except Exception as e:
-        print(str(e))
+        print("Error setting up initial RandomForestClassifier")
+        traceback.print_exc()
+
         #pass    
     
     try:        
         from sklearn.model_selection import cross_val_score
         scores = cross_val_score(logreg, X, y, cv=_CV)
         
+        #print(scores)
+
         _minScore = round(np.amin(scores),6)
         _maxScore = round(np.amax(scores),6)
         _meanScore = round(np.mean(scores),6)
@@ -268,7 +289,7 @@ for countX in range(1, numIterations+1):
         appendFile.write('\n' + str(_minScore)+
 
                         str(',Time:,')  +
-                        str(c.timer.elapsed()) + 
+                        str(iterationTimer.elapsed()) + 
 
                         str(',CV:,')  +
                         str(_CV) + 
@@ -313,7 +334,8 @@ for countX in range(1, numIterations+1):
         appendFile.close()
         FEATURES = []
     except Exception as e:
-        print(str(e))           
+        print("Error during iteration {0}".format(countX))
+        traceback.print_exc()
 
     iterationTimer.print_elapsed("Completed iteration {0}".format(countX), False)
 
