@@ -38,8 +38,8 @@ import sys
 import traceback
 
 from config.IQConfig import IQConfig
-import feature_sets.Original
-import feature_sets.WellKnown
+import strategies.Original
+import strategies.WellKnown
 #import indicators.Custom
 #import indicators.Date
 #import indicators.Diff
@@ -104,7 +104,7 @@ numFailed = 0
 #featuresToExtract.update(indicators.Diff.getDiffFeatures())
 #featuresToExtract.update(indicators.Rolling.getRollingFeatures())
 #featuresToExtract.update(indicators.Famous.getFamousFeatures())
-featuresToExtract = feature_sets.WellKnown.getWellKnownFeatureSet()
+featuresToExtract = strategies.WellKnown.getWellKnownFeatureSet()
 
 featureColumnNames = []
 for feature, settings in featuresToExtract.items():
