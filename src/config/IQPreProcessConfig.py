@@ -6,7 +6,7 @@ class IQPreProcessConfig(object):
     folderName = None
     instrumentsFolderName = None
     
-    featuresFileName = None
+    featuresOutputFormat = None
 
     def __init__(self, iqConfig):
         self.iqConfig = iqConfig
@@ -16,7 +16,7 @@ class IQPreProcessConfig(object):
         c = self.iqConfig.config["preProcess"]
         self.folderName = c["folder"]
         self.instrumentsFolderName = c["instrumentsFolder"]
-        self.featuresFileName = c["featuresFile"]
+        self.featuresOutputFormat = c["featuresOutputFormat"]
 
 
     def getFolder(self):

@@ -12,6 +12,8 @@ def columnName(feature: str, *settings: List[int]) -> TColumnName:
     return cn
 
 def applyFeatures(featuresDictionary: TFeatureLambdasDict, data: pd.DataFrame, features: pd.DataFrame):
+    print("Applying", end='')
     for featureName, feature in featuresDictionary.items():
-        print("Applying {}: {}".format(featureName, feature))
+        print(" {},".format(featureName, feature), end='')
         features[featureName] = feature(data, features)
+    print()
