@@ -24,13 +24,17 @@ def getWellKnownFeatureSet() -> TFeatureLambdasDict:
 
     features.update(WellKnown.macdOscillator(12, 26, 9))
 
-    features.update(WellKnown.stochasticOscillator(14, 5, 3))
+    features.update(WellKnown.stochasticOscillator(5, 3, 3))
+    features.update(WellKnown.stochasticOscillator(10, 10, 5))
+    features.update(WellKnown.stochasticOscillator(14, 5, 3)) # Most common
+    features.update(WellKnown.stochasticOscillator(30, 10, 10))
+    features.update(WellKnown.stochasticOscillator(144, 1, 1))
     
     features.update(WellKnown.rsiOscillator(14))
     
     features.update(WellKnown.atr(14))
 
-    features.update(WellKnown.parabolicSar())
+    #features.update(WellKnown.parabolicSar()) # Iterative, leading to slow to calculate
 
     features.update(WellKnown.cci())
 
