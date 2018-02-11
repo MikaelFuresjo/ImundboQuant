@@ -183,7 +183,7 @@ while (countX < 1000000):
         y = trainData[_Horizont].values # put in relevant target class
         
       
-        _CV = 5 #USE 60 to slit in to seperate 3M periods or 180 to 1M periods
+        _CV = 180 #USE 60 to slit in to seperate 3M periods or 180 to 1M periods
       
         logreg = RandomForestClassifier(n_estimators = n_estimators_Rand,
                                         max_depth = max_depth_Rand,
