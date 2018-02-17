@@ -8,30 +8,31 @@ from utils.CustomTypes import TFeatureLambdasDict
 from utils.Utils import columnName
 
 
-def bollingerBands(period: int = 20, sigma: int = 2) -> TFeatureLambdasDict:
-    """Calculate Bollinger Bands
+
+def bollingerBands(period: int = 20, sigma: int = 2, column: str = "Close") -> TFeatureLambdasDict:
+    """Calculate Normalized Bollinger Bands
     Based on number of standard deviations and period
     Will also add SMA(period) and STD(period)
     """
 
-    sma = Rolling.sma(period)
-    std = Rolling.std(period)
+    sma = Rolling.smaRaw(period, column)
+    std = Rolling.stdRaw(period, column)
 
     smaName = list(sma.keys())[0]
     stdName = list(std.keys())[0]
 
     def bbUpperLambda(data: pd.DataFrame, features: pd.DataFrame):
-        return features[smaName] + (features[stdName] * sigma)
+        return (features[smaName] + (features[stdName] * sigma)) / data[column]
 
     def bbLowerLambda(data: pd.DataFrame, features: pd.DataFrame):
-        return features[smaName] - (features[stdName] * 2)
+        return (features[smaName] - (features[stdName] * 2)) / data[column]
 
     features: TFeatureLambdasDict = {}
     features.update(sma)
     features.update(std)
     features.update({
-        columnName("BBupper", 20, period): bbUpperLambda,
-        columnName("BBlower", 20, period): bbLowerLambda
+        columnName("BBupper", period, sigma): bbUpperLambda,
+        columnName("BBlower", period, sigma): bbLowerLambda
     })
 
     return features
@@ -39,13 +40,14 @@ def bollingerBands(period: int = 20, sigma: int = 2) -> TFeatureLambdasDict:
 #    #https://iknowfirst.com/technical-indicators
 
 def macdOscillator(mediumPeriod: int = 12, longPeriod: int = 26, shortPeriod: int = 9):
-    """Calculate MACD
+    """Calculate Normalized MACD
     MACD Line = mid (often 12day) EMA – long (often 26day) EMA
     Signal Line = short (often 9day) EMA of MACD Line
     The MACD Histogram is the MACD Line – Signal Line
-    Will also add needed EMAs
+    Will also add needed normalized EMAs
     """
 
+    # Using normalized EMAs will yield a normalized MACD
     emaShort = Rolling.ema(shortPeriod)
     emaMedium = Rolling.ema(mediumPeriod)
     emaLong = Rolling.ema(longPeriod)
@@ -81,15 +83,15 @@ def macdOscillator(mediumPeriod: int = 12, longPeriod: int = 26, shortPeriod: in
 
 
 def stochasticOscillator(period: int = 14, smoothKPeriod: int = 5, smoothDPeriod: int = 3, column: str = "Close") -> TFeatureLambdasDict:
-    """Calculate Stochastic Oscillator
-    Calculates %K-fast = 100(Close - Min(period))/(Max(period) - Min(period))
+    """Calculate Normalized Stochastic Oscillator
+    Calculates %K-fast = 100(Close - Min(period))/(Max(period) - Min(period))   100-factor removed due to normalizing
     %K smooths %K-fast
     %D smooths %K
-    Will also add Max(period) and Min(period)
+    Will also add MaxRaw(period) and MinRaw(period)
     """
 
-    max = Rolling.max(period)
-    min = Rolling.min(period)
+    max = Rolling.maxRaw(period)
+    min = Rolling.minRaw(period)
 
     maxName = list(max.keys())[0]
     minName = list(min.keys())[0]
@@ -99,7 +101,7 @@ def stochasticOscillator(period: int = 14, smoothKPeriod: int = 5, smoothDPeriod
     stochDName = columnName("Stoch-D", period, smoothKPeriod, smoothDPeriod)
 
     def kFastLambda(data: pd.DataFrame, features: pd.DataFrame):
-        return 100. * (data[column] - features[minName]) / (features[maxName] - features[minName])
+        return (data[column] - features[minName]) / (features[maxName] - features[minName]) # * 100
 
     def kLambda(data: pd.DataFrame, features: pd.DataFrame):
         return features[stochKFastName].rolling(window=smoothKPeriod).mean()
@@ -120,16 +122,16 @@ def stochasticOscillator(period: int = 14, smoothKPeriod: int = 5, smoothDPeriod
 
 
 def rsiOscillator(period: int = 14) -> TFeatureLambdasDict:
-    """Calculate RSI Oscillator
-    Will also add Diff(Close, Close-1)
+    """Calculate Normalized RSI Oscillator
+    Will also add DiffRaw(Close, Close-1)
     """
 
-    diff = Diff.CtoC(1)
+    diff = Diff.CtoCRaw(1)
 
     diffName = list(diff.keys())[0]
 
-    posName = columnName("PosGain", period)
-    negName = columnName("NegGain", period)
+    posName = columnName("PosGainRaw", period)
+    negName = columnName("NegGainRaw", period)
     rsiRawName = columnName("RSIraw", period)
     rsiName = columnName("RSI", period)
 
@@ -146,7 +148,8 @@ def rsiOscillator(period: int = 14) -> TFeatureLambdasDict:
         return features[posName] / features[negName]
 
     def rsiLambda(data: pd.DataFrame, features: pd.DataFrame):
-        return 100.0 - (100.0 / (1.0 + features[rsiRawName]))
+        return 1 - (1.0 / (1.0 + features[rsiRawName]))
+        # return 100.0 - (100.0 / (1.0 + features[rsiRawName]))    # Non-normalized RSI
 
 
     features: TFeatureLambdasDict = {}
@@ -161,14 +164,15 @@ def rsiOscillator(period: int = 14) -> TFeatureLambdasDict:
     return features
 
 
-def atr(period: int = 14, close: str = "Close", high: str = "High", low: str = "Low") -> TFeatureLambdasDict:
+#Not used, but kept for reference
+def atrRaw(period: int = 14, close: str = "Close", high: str = "High", low: str = "Low") -> TFeatureLambdasDict:
     """Calculate Average True Range
     Based on TR and period
     Will also add TR (True Range)
     """
 
-    trName = columnName("TR")
-    atrName = columnName("ATR")
+    trName = columnName("TRraw")
+    atrName = columnName("ATRraw")
 
     def trLambda(data: pd.DataFrame, features: pd.DataFrame):
         closes = data[close]
@@ -192,13 +196,45 @@ def atr(period: int = 14, close: str = "Close", high: str = "High", low: str = "
     return features
 
 
-def parabolicSar(af: float = 0.02, amax: float = 0.2, highColumn: str = "High", lowColumn: str = "Low") -> TFeatureLambdasDict:
+def atr(period: int = 14, close: str = "Close", high: str = "High", low: str = "Low") -> TFeatureLambdasDict:
+    """Calculate Normalized Average True Range
+    Based on Normalized TR and period
+    Will also add Normalized TR (True Range)
+    """
+
+    trName = columnName("TR")
+    atrName = columnName("ATR")
+
+    def trLambda(data: pd.DataFrame, features: pd.DataFrame):
+        closes = data[close]
+        highs = data[high]
+        lows = data[low]
+        closes1 = closes.shift(-1)
+
+        atr1 = highs - lows
+        atr2 = (highs - closes1).abs()
+        atr3 = (closes1 - lows).abs()
+        return np.max([atr1, atr2, atr3], axis=0) / closes1
+
+    def atrLambda(data: pd.DataFrame, features: pd.DataFrame):
+        return features[trName].rolling(window = period).mean()
+
+    features: TFeatureLambdasDict = {
+        trName: trLambda,
+        atrName: atrLambda
+    }
+
+    return features
+
+
+#Not used, kept for reference
+def parabolicSarRaw(af: float = 0.02, amax: float = 0.2, highColumn: str = "High", lowColumn: str = "Low") -> TFeatureLambdasDict:
     """Calculate Parabolic SAR
     "Stop and Reversal"
     Iterative implementation
     """
 
-    psarName = columnName("PSAR")
+    psarName = columnName("PSARraw")
 
     def psarLambda(data: pd.DataFrame, features: pd.DataFrame):
         high = data[highColumn]
@@ -246,12 +282,64 @@ def parabolicSar(af: float = 0.02, amax: float = 0.2, highColumn: str = "High", 
     return features
 
 
-def cci(period: int = 20, c=0.015, closeCol: str = "Close", highCol: str = "High", lowCol: str = "Low"):
+def parabolicSar(af: float = 0.02, amax: float = 0.2, highColumn: str = "High", lowColumn: str = "Low", normalizeColumn: str = "Close") -> TFeatureLambdasDict:
+    """Calculate Normalized Parabolic SAR
+    "Stop and Reversal"
+    Iterative implementation, normalized simply by latest close
+    """
+
+    psarName = columnName("PSAR")
+
+    def psarLambda(data: pd.DataFrame, features: pd.DataFrame):
+        high = data[highColumn]
+        low = data[lowColumn]
+
+        # Starting values
+        sig0, xpt0, af0 = True, high[0], af
+        sar = [low[0] - (high - low).std()]
+
+        for i in range(1, len(data)):
+            sig1, xpt1, af1 = sig0, xpt0, af0
+
+            lmin = min(low[i - 1], low[i])
+            lmax = max(high[i - 1], high[i])
+
+            if sig1:
+                sig0 = low[i] > sar[-1]
+                xpt0 = max(lmax, xpt1)
+            else:
+                sig0 = high[i] >= sar[-1]
+                xpt0 = min(lmin, xpt1)
+
+            if sig0 == sig1:
+                sari = sar[-1] + (xpt1 - sar[-1])*af1
+                af0 = min(amax, af1 + af)
+
+                if sig0:
+                    af0 = af0 if xpt0 > xpt1 else af1
+                    sari = min(sari, lmin)
+                else:
+                    af0 = af0 if xpt0 < xpt1 else af1
+                    sari = max(sari, lmax)
+            else:
+                af0 = af
+                sari = xpt0
+
+            sar.append(sari)
+
+        return pd.Series(sar / data[normalizeColumn], index=data.index)
+
+    features: TFeatureLambdasDict = {
+        psarName: psarLambda
+    }
+
+    return features
+
+
+def cci(period: int = 20, c=1.5, closeCol: str = "Close", highCol: str = "High", lowCol: str = "Low"):
     """Calculate CCI (Commodity Channel Index)
-    MACD Line = mid (often 12day) EMA – long (often 26day) EMA
-    Signal Line = short (often 9day) EMA of MACD Line
-    The MACD Histogram is the MACD Line – Signal Line
-    Will also add needed EMAs
+    CCI is with default c=0.015 is set so that 70-80% of values fall into the [-100,100] range
+    c is therefore set to 1.5 =  cTypical*100 to make 70-80% fall into [-1,1]
     """
 
     cciName = columnName("CCI", period)

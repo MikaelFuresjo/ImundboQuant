@@ -12,8 +12,7 @@ def getDateFeatures() -> TFeatureLambdasDict:
     """
 
     return {
-        "Date": lambda data, features: data.index.date,
-        "Date": lambda data, features: data.index.date,
+        #"Date": lambda data, features: data.index.date,
         "DayOfWeek": lambda data, features: data.index.dayofweek,
         "DayOfMonth": lambda data, features: data.index.day,
         "DayOfYear": lambda data, features: data.index.dayofyear,

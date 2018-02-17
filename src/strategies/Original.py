@@ -7,7 +7,7 @@ from indicators import Custom, Date, Diff, Rolling
 from utils.CustomTypes import TColumnName, TFeatureLambda, TFeatureLambdasDict
 from utils.Utils import columnName
 
-def getOriginalFeatureSet() -> TFeatureLambdasDict:
+def getStrategy() -> TFeatureLambdasDict:
     """Get same features as original "OldPreProcess.py" script
        NOT COMPLETE
        returns TFeatureLambdasDict
