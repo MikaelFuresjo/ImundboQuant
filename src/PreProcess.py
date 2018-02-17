@@ -28,24 +28,21 @@ IMUNDBO QUANT v1.8 (Preprocessing script)
 import csv
 from datetime import datetime
 import glob
+import importlib
 import numpy as np
 import pandas as pd
 import time
 import datetime
 import matplotlib.pyplot as plt
 import os
+import pathlib
 import sys
 import traceback
 
 from config.IQConfig import IQConfig
-import strategies.Original
-import strategies.WellKnown
-#import indicators.Custom
-#import indicators.Date
-#import indicators.Diff
-#import indicators.Rolling
-#import indicators.WellKnown
+
 from gui.console import Console
+from utils.CustomTypes import TColumnName, TFeatureLambda, TFeatureLambdasDict
 from utils.Utils import columnName, applyFeatures
 
 
@@ -58,90 +55,105 @@ c = Console(
                 |_|                                  
 
  Preprocess ticker data and extract features to use optimizing machine learning system
- Ticker data should be inside "instrumentsFolder", one csv file per ticker.
-
- Each file is expected to contain comma-separated values:
- ["Date", "Open", "High", "Low", "Close", "Volume", "OI"]
 
 """)
 
 
 
 # Settings are kept in config/config.json
-#########################################
-#  Example config relevant PreProcess:
-#  {
-#     "root": "c:\\data",
-#     "preProcess": {
-#       "folder": "PreProcess",
-#       "instrumentsFolder": "PreProcess\\Instrument_FX30",
-#       "featuresFile": "MASSIVE_IQ19p_535ft.txt"
-#     },
-#  }
-
 
 config = IQConfig()
-preProcessPath = config.preProcess.getFolder()
-instrumentsPath = config.preProcess.getInstrumentsFolder()
 
-featuresOutputPath = os.path.join(preProcessPath, config.preProcess.featuresFileName)
-allInstrumentsFeatures = None
-
-instruments = glob.glob(os.path.join(instrumentsPath, "*.txt"))
-
-fileColumns = ["Date", "Open", "High", "Low", "Close", "Volume", "OI"]
+instrumentsGlob = os.path.join(config.root, config.input.instrumentsGlob)
 
 
+instruments = glob.glob(instrumentsGlob)
 numInstruments = len(instruments)
 
-print ('Reading {0} files with ticker data from {1}...'.format(numInstruments, instrumentsPath))
+if numInstruments == 0:
+    raise AssertionError("No instruments found in {}".format(instrumentsGlob))
+
+print ('Reading {0} files with ticker data from {1}...'.format(numInstruments, instrumentsGlob))
+
+
+
+fileColumns = config.input.columns
+supportedColumns = [ "Date", "Open", "High", "Low", "Close", "Volume"]
+
+print("Columns specified: {0}".format(fileColumns))
+
+if not all(column in supportedColumns for column in fileColumns):
+    raise AssertionError("Columns not supported specified in config.json/input/columns. \nSpecified: {} \nSupported: {}".format(fileColumns, supportedColumns))
+
+
+featuresStrategyName = config.features.featuresStrategy
+targetsStrategyName = config.features.targetsStrategy
+
+featuresToExtract: TFeatureLambdasDict = []
+targetsToExtract: TFeatureLambdasDict = []
+
+try:
+    featureStrategy = importlib.import_module("strategies.{}".format(featuresStrategyName))
+    print("\nFeatures strategy: {}".format(featuresStrategyName))
+    featuresToExtract = featureStrategy.getStrategy()
+except Exception as e:
+    print("ERROR loading features strategy")
+    traceback.print_exc()
+    
+
+try:
+    targetsStrategy = importlib.import_module("targetStrategies.{}".format(targetsStrategyName))
+    print("Targets strategy: {}".format(targetsStrategyName))
+    targetsToExtract = targetsStrategy.getStrategy()
+except Exception as e:
+    print("ERROR loading targets strategy")
+    traceback.print_exc()
+
+
+
+featuresOutputPath = os.path.join(config.root, config.features.featuresOutputFormat.format(featuresStrategyName))
+targetsOutputPath = os.path.join(config.root, config.features.targetsOutputFormat.format(targetsStrategyName))
+
+
+
 
 numCompleted = 0
 numFailed = 0
 
 
-#featuresToExtract = indicators.Date.getDateFeatures()
-#featuresToExtract.update(indicators.Diff.getDiffFeatures())
-#featuresToExtract.update(indicators.Rolling.getRollingFeatures())
-#featuresToExtract.update(indicators.Famous.getFamousFeatures())
-featuresToExtract = strategies.WellKnown.getWellKnownFeatureSet()
-
 featureColumnNames = []
 for feature, settings in featuresToExtract.items():
     featureColumnNames.append(feature)
 
-print("Features to calculate: {0}".format(featureColumnNames))
+targetColumnNames = []
+for feature, settings in targetsToExtract.items():
+    targetColumnNames.append(feature)
 
+
+filteredFeatureColumnNames = [feature for feature in featureColumnNames if not "Raw" in feature and not "raw" in feature]
+
+print("\nFeatures to calculate: {0}".format(filteredFeatureColumnNames))
+print("\nTargets to calculate: {0}".format(targetColumnNames))
+
+input("\nPress [Return] to continue")
+
+
+
+allInstrumentsFeatures = None
+allInstrumentsTargets = None
 
 
 for index, instrument in enumerate(instruments):
-    instrumentPath = os.path.join(instrumentsPath, instrument)
     instrumentName = os.path.splitext(instrument)[0]
 
     print("\nProcessing {0} ({1} / {2})...".format(instrumentName, index+1, numInstruments))
 
-    #{
-    #    "date": True,
-    #    "dayOfWeek": True,
-    #    "dayOfMonth": True,
-    #    "dayOfYear": True,
-    #    "weekOfYear": True,
-    #    "monthOfYear": True,
-    #    "time": True,
-    #    "hour": True,
-    #    "minute": True,
-    #
-    #    #"diffCtoH": range(0, 25+1),  #Idea: Adding all these four maybe duplicates data unneccessarily?
-    #    #"diffCtoL": range(0, 25+1),  #      How about only keeping CtoC and use intraday for the others?
-    #    #"diffCtoO": range(0, 25+1),  #      Even simple algos should probably be able to combine?
-    #    #"diffCtoC": range(1, 25+1),  #      Maybe intraday move n days ago could be interesting as well...
-    #
-    #}
-
-
     try:
-        data = pd.read_csv(instrumentPath, parse_dates=['Date'], header=None, index_col="Date", names=fileColumns)
+        data = pd.read_csv(instrument, parse_dates=['Date'], header=None, index_col="Date", names=fileColumns, usecols=fileColumns)
+        print("Read {0} rows".format(len(data)))
+
         features = pd.DataFrame(columns = featureColumnNames, index = data.index)
+        targets = pd.DataFrame(columns = targetColumnNames, index = data.index)
         numRows = len(data)
 
     except Exception as e:
@@ -151,32 +163,72 @@ for index, instrument in enumerate(instruments):
         continue
 
     applyFeatures(featuresToExtract, data, features)
+    applyFeatures(targetsToExtract, data, targets)
 
-    # Benchmark 1 50s for first 2
-    # Benchmark 2 22s for first 7
-    features = features[featureColumnNames] #remove any extra
 
+    features = features[filteredFeatureColumnNames] #remove any extra
+    targets = targets[targetColumnNames] #remove any extra
+    
     allInstrumentsFeatures = pd.concat([allInstrumentsFeatures, features], ignore_index = True)
-    allInstrumentsFeatures.to_csv(featuresOutputPath, ";")
-    print("Saved {0}".format(featuresOutputPath))
+    allInstrumentsTargets = pd.concat([allInstrumentsTargets, targets], ignore_index = True)
 
-    ## plot values, rolling mean and Bollinger Bands
-    #ax = data['Close'].plot(title="Bollinger Bands", label=instrumentName, figsize=(80, 60))
-    #features[columnName("SMA", 200)].plot(label='SMA(20)', ax=ax)
-    #features[columnName("BBupper", 20, 2)].plot(label='upper band', ax=ax)
-    #features[columnName("BBlower", 20, 2)].plot(label='lower band', ax=ax)
-    #
-    ## Add labels 
-    #ax.legend(loc='lower left')
-    #ax.set_xlabel("Date")
-    #ax.set_ylabel("Price")
-    #plt.savefig(os.path.join(preProcessPath, instrumentName + ".png"))
-    #print ("Saved " + os.path.join(preProcessPath, instrumentName + ".png"))
-    
-    
     c.timer.print_elapsed("Completed processing of {0}".format(instrumentName))
 
     numCompleted+=1
-### END part where to write every Future value and Feature, day by day and intrument by instrument to .txt file to read csv style. 
+
+
+
         
-c.timer.print_elapsed('Completed preprocessing {0} files with ticker data ({1} failed) from {2}'.format(numCompleted, numFailed, instrumentPath))
+print("Dropping rows containing, Inf, -Inf, and NaN...")
+
+allInstrumentsFeatures.replace([np.inf, -np.inf], np.nan, inplace = True)
+allInstrumentsFeatures.dropna(inplace = True)
+
+allInstrumentsTargets.replace([np.inf, -np.inf], np.nan, inplace = True)
+allInstrumentsTargets.dropna(inplace = True)
+
+# intercect indices so that rows removed above are removed from both features and targets
+ix = allInstrumentsFeatures.index.intersection(allInstrumentsTargets.index)
+allInstrumentsFeatures = allInstrumentsFeatures.loc[ix]
+allInstrumentsTargets = allInstrumentsTargets.loc[ix]
+
+
+print("Saving {0} rows to {1}...".format(len(allInstrumentsFeatures), featuresOutputPath))
+
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+
+
+
+pathlib.Path(os.path.dirname(featuresOutputPath + ".msg")).mkdir(parents=True, exist_ok=True) 
+
+allInstrumentsFeatures.to_msgpack(featuresOutputPath + ".msg")
+c.timer.print_elapsed("Saved msgpack")
+allInstrumentsTargets.to_msgpack(targetsOutputPath + ".msg")
+c.timer.print_elapsed("Saved targets msgpack")
+
+allInstrumentsFeatures.to_csv(featuresOutputPath + ".csv", float_format="%.6f")
+c.timer.print_elapsed("Saved csv")
+allInstrumentsTargets.to_csv(targetsOutputPath + ".csv", float_format="%.6f")
+c.timer.print_elapsed("Saved targets csv")
+
+#### Quicker excel export (but still a lot slower than csv and A LOT slower than csv)
+#wb = Workbook(write_only=True)
+#ws = wb.create_sheet()
+#
+#for r in dataframe_to_rows(allInstrumentsFeatures, index=False, header=True):
+#    ws.append(r)
+#wb.save(featuresOutputPath) 
+#
+#c.timer.print_elapsed("Saved quick excel")
+####
+
+### Slower
+#allInstrumentsFeatures.to_excel(featuresOutputPath, float_format="%.6f", index=False, freeze_panes=(1,0), sheet_name='report', engine='xlsxwriter') #xlsxwriter
+
+#wb = Workbook()
+#wb.new_sheet("Strategy features", data=[allInstrumentsFeatures.columns.tolist(), ] + allInstrumentsFeatures.values.tolist())
+#wb.save(featuresOutputPath)
+
+print("Saved {0}".format(featuresOutputPath))
+c.timer.print_elapsed('Completed preprocessing {0} files with ticker data ({1} failed) from {2}'.format(numCompleted, numFailed, instrumentsGlob))
