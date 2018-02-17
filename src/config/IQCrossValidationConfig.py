@@ -1,5 +1,6 @@
 import os
 
+# Wrapper for config.json -- DO NOT EDIT
 class IQCrossValidationConfig(object):
     iqConfig = None
 

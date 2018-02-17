@@ -1,14 +1,17 @@
 import json
 from config.IQCrossValidationConfig import IQCrossValidationConfig
-from config.IQPreProcessConfig import IQPreProcessConfig
+from config.IQInputConfig import IQInputConfig
+from config.IQFeaturesConfig import IQFeaturesConfig
 from config.IQPickleProducerConfig import IQPickleProducerConfig
 
+# Wrapper for config.json -- DO NOT EDIT
 class IQConfig(object):
     configFile = None
     config = None
 
     root = None
-    preProcess = None
+    input = None
+    features = None
     pickleProducer = None
     crossValidation = None
 
@@ -24,6 +27,7 @@ class IQConfig(object):
 
     def parseConfig(self):
         self.root = self.config["root"]
-        self.preProcess = IQPreProcessConfig(self)
+        self.input = IQInputConfig(self)
+        self.features = IQFeaturesConfig(self)
         self.pickleProducer = IQPickleProducerConfig(self)
         self.crossValidation= IQCrossValidationConfig(self)

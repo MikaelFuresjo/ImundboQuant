@@ -1,5 +1,6 @@
 import os
 
+# Wrapper for config.json -- DO NOT EDIT
 class IQPickleProducerConfig(object):
     iqConfig = None
 
