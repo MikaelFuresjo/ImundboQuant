@@ -1,27 +1,29 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
-import matplotlib.dates as mdates
-from matplotlib.dates import strpdate2num
-import datetime
-import urllib2#
-import urllib
+import dateutil
 import datetime
 import time#
 import os
-import dateutil
+import sys
 
+from gui.console import Console
 
 
 def makeForecast(inputList):
     try:
+        c = Console(None, False, False)
+        print("Starting iteration timeline...")
+
         ##################### CHANGE PATH TO THE DIRECTORY YOU USE ON YOUR COMPUTER ##############
-        importantPath = 'C:\Users\UserTrader\Documents\ImundboQuant\pklFiles\FX30_IQ19p'
+        #importantPath = 'C:\Users\UserTrader\Documents\ImundboQuant\pklFiles\FX30_IQ19p'
+        importantPath = r'c:\Documents\ImundboQuant'
         ##################### CHANGE PATH TO THE DIRECTORY USED BY YOUR MetaTrader4 (MT4) PLATFORM ON YOUR COMPUTER ########
         ##################### FROM MT4, FIND THE DIRECTORY UNDER "FILES" => "OPEN DATA FOLDER"  ########        
-        MetaStockCSVfile = 'C:\Users\UserTrader\AppData\Roaming\MetaQuotes\Terminal\C142B020C05FAD9EEC4BE1375F709241\MQL4\Files\orderdata' ## IG Markets
-        #MetaStockCSVfile = 'C:\Users\UserTrader\AppData\Roaming\MetaQuotes\Terminal\3BD2B5E5A5264AFE17C1E2DDC7D6B381\MQL4\Files\OrderData' ## AAAfx
-        MetaStockPath = 'C:\Users\UserTrader\AppData\Roaming\MetaQuotes\Terminal\C142B020C05FAD9EEC4BE1375F709241\MQL4\Files\Research'
+        #MetaStockCSVfile = 'C:\Users\UserTrader\AppData\Roaming\MetaQuotes\Terminal\C142B020C05FAD9EEC4BE1375F709241\MQL4\Files\orderdata' ## IG Markets
+        #MetaStockPath = 'C:\Users\UserTrader\AppData\Roaming\MetaQuotes\Terminal\C142B020C05FAD9EEC4BE1375F709241\MQL4\Files\Research'
+        MetaStockCSVfile = r'c:\Users\victo\AppData\Roaming\MetaQuotes\Terminal\53264E01B18B63DA7BC348929475A97C\MQL4\Files\orderdata'
+        MetaStockPath = r'c:\Users\victo\AppData\Roaming\MetaQuotes\Terminal\53264E01B18B63DA7BC348929475A97C\MQL4\Files\Research'
 
         ########################################################################
 
@@ -42,7 +44,11 @@ def makeForecast(inputList):
         yahoo_RealNames_list = fleraTickers.split('\n')
         TickerFile.close()
     
+        c.timer.print_elapsed("Processing {0} tickers with {1} realnames".format(len(yahoo_ticker_list), len(yahoo_RealNames_list)))
+
         #### Get content for the FEATURE list, from file in Python root dir.
+        print("Getting features based on {0} files...".format(FeatFiles))
+
         FEATURES_IQ19 = []
         readThisFile = r''+importantPath+FeatFiles+'ALL.txt'
         featuresFile = open(readThisFile)
@@ -160,7 +166,7 @@ def makeForecast(inputList):
         featuresFile = open(readThisFile)
         fleraFeatures = featuresFile.read()
         FEATURES16 = fleraFeatures.split('\n')
-        featuresFile.close()
+        featuresFile.close()        
         
         FEATURES17 = []
         readThisFile = r''+importantPath+FeatFiles+'17.txt'
@@ -260,17 +266,21 @@ def makeForecast(inputList):
         FEATURES30 = fleraFeatures.split('\n')
         featuresFile.close()        
 
+        c.timer.print_elapsed("Finished getting features".format(FeatFiles))
+
     except Exception as e:
         print(str(e))    
+        pass
     
     try:    
-        for eachTicker in yahoo_ticker_list:
-            import datetime
-            FileLocation = r''+MetaStockPath+"\\"+eachTicker+'.txt'
-            Unix, Open, High, Low, Close = np.loadtxt(FileLocation, delimiter=',', unpack=True)
+        print("\n\n============\n")
 
-            from datetime import datetime
-            import datetime
+        for eachTicker in yahoo_ticker_list:
+            FileLocation = r''+MetaStockPath+"\\"+eachTicker+'.txt'
+            print("\nOpening ticker {0}...".format(eachTicker))
+            Unix, Open, High, Low, Close = np.loadtxt(FileLocation, delimiter=',', unpack=True)
+            print("Loaded {0}, computing features...".format(eachTicker))
+
             _dateDayOfYear = float(datetime.datetime.fromtimestamp(Unix[-1]).strftime('%j'))
             _dateWeekOfYear = float(datetime.datetime.fromtimestamp(Unix[-1]).strftime('%W'))
             _dateMonthOfYear = float(datetime.datetime.fromtimestamp(Unix[-1]).strftime('%m'))
@@ -285,7 +295,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_05 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_05 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
             try:            
@@ -296,7 +306,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_06 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_06 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -309,7 +319,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_07 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_07 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -321,7 +331,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_08 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_08 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -333,7 +343,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_09 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_09 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -345,7 +355,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_10 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_10 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -357,7 +367,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_11 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_11 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -369,7 +379,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_12 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_12 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -381,7 +391,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_13 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_13 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -393,7 +403,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_14 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_14 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -405,7 +415,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_15 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_15 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -417,7 +427,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_16 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_16 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -429,7 +439,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_17 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_17 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -441,7 +451,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_18 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_18 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -453,7 +463,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_19 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_19 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -465,7 +475,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_20 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_20 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -477,7 +487,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_21 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_21 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -489,7 +499,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_22 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_22 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -501,7 +511,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_23 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_23 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -513,7 +523,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_24 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_24 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -525,7 +535,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_25 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_25 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -537,7 +547,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_26 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_26 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -549,7 +559,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_27 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_27 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -561,7 +571,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_28 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_28 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -573,7 +583,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_29 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_29 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -585,7 +595,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_30 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_30 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -597,7 +607,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_31 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_31 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -609,7 +619,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_32 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_32 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -621,7 +631,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_33 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_33 = np.round(_KeyValueLong - _KeyValueShort,6)
             except Exception as e:
                 pass
 
@@ -633,7 +643,7 @@ def makeForecast(inputList):
                 _ABSofDiff_CpHf = abs(_Diff_CpHf)
                 _KeyValueLong = _ABSofDiff_CpHf/_CpHf_Less_CpLf
                 _KeyValueShort = _ABSofDiff_CpLf/_CpHf_Less_CpLf
-                _PastSharp_34 = round(_KeyValueLong - _KeyValueShort,6)
+                _PastSharp_34 = np.round(_KeyValueLong - _KeyValueShort,6)
  
             except Exception as e:
                 pass
@@ -825,19 +835,19 @@ def makeForecast(inputList):
                                 )/14
             
             Zeros = [1]*len(Unix)
-            RL3 = round(np.polyfit(Zeros[:-4:-1], Close[:-4:-1], 0),13)
-            RL5 = round(np.polyfit(Zeros[:-6:-1], Close[:-6:-1], 0),13)            
-            RL8 = round(np.polyfit(Zeros[:-9:-1], Close[:-9:-1], 0),13)
-            RL13 = round(np.polyfit(Zeros[:-14:-1], Close[:-14:-1], 0),13)
-            RL21 = round(np.polyfit(Zeros[:-22:-1], Close[:-22:-1], 0),13)
-            RL34 = round(np.polyfit(Zeros[:-35:-1], Close[:-35:-1], 0),13)
-            RL55 = round(np.polyfit(Zeros[:-56:-1], Close[:-56:-1], 0),13)           
-            RL89 = round(np.polyfit(Zeros[:-90:-1], Close[:-90:-1], 0),13)           
-            RL100 = round(np.polyfit(Zeros[:-101:-1], Close[:-101:-1], 0),13)      
-            RL144 = round(np.polyfit(Zeros[:-145:-1], Close[:-145:-1], 0),13)                
-            RL200 = round(np.polyfit(Zeros[:-201:-1], Close[:-201:-1], 0),13)
-            RL233 = round(np.polyfit(Zeros[:-234:-1], Close[:-234:-1], 0),13)
-            RL377 = round(np.polyfit(Zeros[:-378:-1], Close[:-378:-1], 0),13)
+            RL3 = np.round(np.polyfit(Zeros[:-4:-1], Close[:-4:-1], 0),13)
+            RL5 = np.round(np.polyfit(Zeros[:-6:-1], Close[:-6:-1], 0),13)            
+            RL8 = np.round(np.polyfit(Zeros[:-9:-1], Close[:-9:-1], 0),13)
+            RL13 = np.round(np.polyfit(Zeros[:-14:-1], Close[:-14:-1], 0),13)
+            RL21 = np.round(np.polyfit(Zeros[:-22:-1], Close[:-22:-1], 0),13)
+            RL34 = np.round(np.polyfit(Zeros[:-35:-1], Close[:-35:-1], 0),13)
+            RL55 = np.round(np.polyfit(Zeros[:-56:-1], Close[:-56:-1], 0),13)           
+            RL89 = np.round(np.polyfit(Zeros[:-90:-1], Close[:-90:-1], 0),13)           
+            RL100 = np.round(np.polyfit(Zeros[:-101:-1], Close[:-101:-1], 0),13)      
+            RL144 = np.round(np.polyfit(Zeros[:-145:-1], Close[:-145:-1], 0),13)                
+            RL200 = np.round(np.polyfit(Zeros[:-201:-1], Close[:-201:-1], 0),13)
+            RL233 = np.round(np.polyfit(Zeros[:-234:-1], Close[:-234:-1], 0),13)
+            RL377 = np.round(np.polyfit(Zeros[:-378:-1], Close[:-378:-1], 0),13)
             
             Diff_C_RL8 = (Close[-1]-RL8)/RL8
             Diff_C_RL34 = (Close[-1]-RL34)/RL34
@@ -1336,10 +1346,10 @@ def makeForecast(inputList):
             _DiffD377_C = (Close[-1]-_BBD377)/_BBD377            
             
             _BBU8 = np.sum(Close[:-9:-1])/8+(np.std(Close[:-9:-1])*2)
-            _DiffU8_C = round((Close[-1]-_BBU8)/_BBU8,3)      
+            _DiffU8_C = np.round((Close[-1]-_BBU8)/_BBU8,3)      
     
             _BBU13 = np.sum(Close[:-14:-1])/13+(np.std(Close[:-14:-1])*2)
-            _DiffU13_L3 = round((_SMA_L3-_BBU13)/_BBU13,3)
+            _DiffU13_L3 = np.round((_SMA_L3-_BBU13)/_BBU13,3)
     
             _BBU21 = np.sum(Close[:-22:-1])/21+(np.std(Close[:-22:-1])*2)
             _DiffU21_L3 = (_SMA_L3-_BBU21)/_BBU21
@@ -1457,15 +1467,17 @@ def makeForecast(inputList):
                             'Diff_RL55_RL89':Diff_RL55_RL89,
                             'Diff_RL8_RL55':Diff_RL8_RL55,
                             'RL200':RL200
-                            }, ignore_index = True)        
-    
-            FileLocation4excel = r''+importantPath+'\\for'+eachTicker+'_excel.xlsx'
+                            }, ignore_index = True)
+
+            FileLocation4excel = importantPath+'\\for'+eachTicker+'_excel.xlsx'
+            print("Priming {0}".format(FileLocation4excel))
             df.to_excel(FileLocation4excel, index=False)
             #print(df)
     except Exception as e:
-        print(str(e))
+        print("Exception before saving excel: " + str(e))
+        pass
 
-
+    c.timer.print_elapsed("\nFinished computing features and priming files")
 ###################################################################3    
 
 
@@ -1473,6 +1485,8 @@ def makeForecast(inputList):
 
     from sklearn.externals import joblib
  
+    print("Loading pickled files...")
+
     logreg_01 = joblib.load(r''+importantPath+pklFiles+'01.pkl')
     logreg_02 = joblib.load(r''+importantPath+pklFiles+'02.pkl')
     logreg_03 = joblib.load(r''+importantPath+pklFiles+'03.pkl')
@@ -1503,12 +1517,17 @@ def makeForecast(inputList):
     logreg_28 = joblib.load(r''+importantPath+pklFiles+'28.pkl')  
     logreg_29 = joblib.load(r''+importantPath+pklFiles+'29.pkl')   
     logreg_30 = joblib.load(r''+importantPath+pklFiles+'30.pkl')    
-    
+
+
 
     for eachTicker, eachRealNames in zip(yahoo_ticker_list, yahoo_RealNames_list):
+        print("\n== Starting calculations for {0} ===".format(eachTicker))
+
         try:
-            Location = r'for'+eachTicker+'_excel.xlsx'
+            Location = importantPath+'\\for'+eachTicker+'_excel.xlsx'
+            print("Reading {0}".format(Location))
             data = pd.read_excel(Location)
+
             feat01 = np.array(data[FEATURES01].values) # making a Numpay array from the Pandas dataset
             feat02 = np.array(data[FEATURES02].values) # making a Numpay array from the Pandas dataset
             feat03 = np.array(data[FEATURES03].values) # making a Numpay array from the Pandas dataset
@@ -1540,12 +1559,35 @@ def makeForecast(inputList):
             feat29 = np.array(data[FEATURES29].values)
             feat30 = np.array(data[FEATURES30].values)
             
+            print("Finished reading {0} and converting to arrays".format(Location))
+            
         except Exception as e:
-            print(str(e))     
+            print("Error reading xlsx: " + str(e))    
 
 ##########################################################################
         try:
+            print("Predicting probabilities for features...")
+            
+
+            feats = [
+                feat01, feat02, feat03, feat04, feat05, feat06, feat07, feat08, feat09, feat10, 
+                feat11, feat12, feat13, feat14, feat15, feat16, feat17, feat18, feat19, feat20,
+                feat21, feat22, feat23, feat24, feat25, feat26, feat27, feat28, feat29, feat30
+            ]
+
+            for currentFeat in feats:
+                for index, feat in enumerate(currentFeat[0]):
+                    if type(feat) is str:
+                        # Fix for (probably inconsistencies of pickled data of older version, should probably be removed)
+                        print("HACK: Converting: '{0}' due to old pickle format, assuming array syntax => single float".format(feat))
+                        currentFeat[0, index] = float(feat[1:-1]) # float convert literal array syntax, possibly incorrect
+                        #print("Converted {0}".format(currentFeat[0, index]))
+                    #print(feat)
+                    #print(index)
+                    #print(type(feat))
+
             Value_01 = logreg_01.predict_proba(feat01)
+
             _01N5 = round(Value_01[0][0],6)
             _01N4 = round(Value_01[0][1],6)
             _01N3 = round(Value_01[0][2],6)
@@ -1904,19 +1946,25 @@ def makeForecast(inputList):
             _30P3 = round(Value_30[0][8],6) 
             _30P4 = round(Value_30[0][9],6) 
             _30P5 = round(Value_30[0][10],6)
-       
+
+            print("Completed calculations...")
         except Exception as e:
-            print(str(e))         
+            print("Error calculating" + str(e))
+            pass
+
+
+
+        print("Building indicators for final prediction values...")
+
         try:       
     ### END loading the saved .pkl files with trained algo information
 
     ### START building own indicators for final prediction values
     
+
         ### 1st stage, adding all StrongBuy percentage vs all StrongSell percantage
         ### continuing with comparing all Buy percantage vs all Sell percentage
             ### Doing this for the 7 algos based on future Pattern first
-            
-            
             
             _Prob01 = _01P1+_01P2+_01P3+_01P4+_01P5-_01N1-_01N2-_01N3-_01N4-_01N5
             _Prob02 = _02P1+_02P2+_02P3+_02P4+_02P5-_02N1-_02N2-_02N3-_02N4-_02N5
@@ -1992,20 +2040,26 @@ def makeForecast(inputList):
                          
         except Exception as e:
             print(str(e))
+            pass
 
     try:    
-        Ultimate_df2 = Ultimate_df2.sort('Forecast', ascending=False)
+        Ultimate_df2 = Ultimate_df2.sort_values(by=['Forecast'], ascending=False)
         Count_Row=Ultimate_df2.shape[0]
     except Exception as e:
         print(str(e))
 
 
+    print("\n\n=== Saving and printing results ===\n")
 
     if Count_Row == 30:
         try:        
+            print(Ultimate_df2)
             Ultimate_df2.to_csv(MetaStockCSVfile + '\OrderDataIQ19p.csv', sep=',', header=False, index=False)
             Ultimate_df2.to_csv(MetaStockCSVfile + '\OrderDataIQ19pTEMP.csv', sep=',', header=False, index=False)
-            print(Ultimate_df2)
+
+            print("\nSaving to {0}:", MetaStockCSVfile)
+            print("- OrderDataIQ19p.csv")
+            print("- OrderDataIQ19pTEMP.csv")
         except Exception as e:
             print(str(e))        
 
@@ -2013,25 +2067,44 @@ def makeForecast(inputList):
         pass
 
 
-#makeForecast('Forex30')
 
 
-i = 1
-while i < 11:
-    import datetime
-    import time#    
-    unixTimestamp = int(time.time())
-    timestampXX = int(str(datetime.datetime.fromtimestamp(int(unixTimestamp)).strftime('%H')))
-    weekDay = int(str(datetime.datetime.fromtimestamp(int(unixTimestamp)).strftime('%w')))
-    timestampMin = int(str(datetime.datetime.fromtimestamp(int(unixTimestamp)).strftime('%M')))    
 
-    if timestampXX > 6 and timestampXX < 22 and weekDay < 6:
-        makeForecast('Forex30')
+def main():
+    #makeForecast('Forex30')
+
+    c = Console(
+"""  _____                            _            
+ |  ___|__  _ __ ___  ___ __ _ ___| |_ ___ _ __ 
+ | |_ / _ \| '__/ _ \/ __/ _` / __| __/ _ \ '__|
+ |  _| (_) | | |  __/ (_| (_| \__ \ ||  __/ |   
+ |_|  \___/|_|  \___|\___\__,_|___/\__\___|_|   
+
+""")
+
+
+    numIterations = 100
+
+    for i in range(1, numIterations + 1):
+        c.timer.print_elapsed("Starting iteration {0} / {1}".format(i, numIterations))
         unixTimestamp = int(time.time())
-        timestamp = str(datetime.datetime.fromtimestamp(int(unixTimestamp)).strftime('%Y-%m-%d %H_%M'))
-        print(timestamp)
-        #print(MatrixMT4)          
+        timestampXX = int(str(datetime.datetime.fromtimestamp(int(unixTimestamp)).strftime('%H')))
+        weekDay = int(str(datetime.datetime.fromtimestamp(int(unixTimestamp)).strftime('%w')))
+        timestampMin = int(str(datetime.datetime.fromtimestamp(int(unixTimestamp)).strftime('%M')))    
 
-        time.sleep(1800)        
-    else:
-        pass
+        if timestampXX > 6 and timestampXX < 22 and weekDay < 6:
+            makeForecast('Forex30')
+            unixTimestamp = int(time.time())
+            timestamp = str(datetime.datetime.fromtimestamp(int(unixTimestamp)).strftime('%Y-%m-%d %H_%M'))
+            
+            print("Timestamp of run: {0}".format(timestamp))
+
+            c.timer.print_elapsed("\nIteration {0} / {1} finished, sleeping 30 minutes".format(i, numIterations))
+
+            time.sleep(1800)
+        else:
+            print("Skipping iteration {0}".format(i))
+            pass
+
+if __name__ == "__main__":
+    sys.exit(int(main() or 0))

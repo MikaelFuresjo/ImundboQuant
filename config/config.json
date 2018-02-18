@@ -1,0 +1,43 @@
+{
+  "root": "c:\\Documents\\ImundboQuant",
+  "preProcess": {
+    "folder": "PreProcess",
+    "instrumentsFolder": "PreProcess\\Instrument_FX30",
+    "featuresFile": "MASSIVE_IQ19p_535ft.txt"
+  },
+  "pickleProducer": {
+    "folder": "pickles",
+    "features": {
+      "folder": "features",
+      "prefix": "FX30_IQ19p"
+    },
+    "training": {
+      "folder": "training",
+      "fileName": "TrainingDataset_IQ19qFX30.xlsx"
+    },
+    "slot": "10",
+    "horizon": "Tgt_SCH05to08",
+    "trainingInst": "LH40_535ft",
+    "numFeatures": 8,
+    "randomForest": {
+      "n_estimators": 150,
+      "max_features": null,
+      "max_depth": 150,
+      "min_samples_split": 150,
+      "min_samples_leaf": 50,
+      "max_leaf_nodes": 10000,
+      "n_jobs": -1,
+      "random_state": 42
+    }
+  },
+  "crossValidation": {
+    "training": {
+      "folder": "CrossValidation",
+      "fileName": "50kFX30sortDate_535ft.xlsx"
+    },
+    "numIterations": 10
+  },
+
+  "paths": {
+  }
+}
