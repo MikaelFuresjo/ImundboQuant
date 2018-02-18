@@ -24,7 +24,7 @@ OPEN-SOURCE PROJECT | Machine learning in Python and MQL4 for stock market and f
 - USE DropBox link (above) to download Forex End-Of-Day (EOD) data with preprocessed matrices in Excel to use with the CrossValidation.py script.
 
 ## Usage
-- PreProcess.py creates our data matrix with 535 features and 8 targets values.
+- CalculateFeatures.py preprocesses instruments and calculates features based on selected strategy in config.json.
 - CrossValidation.py cross validates the dataset for best possible feature combination.
 - PickleProducer.py takes cross validated output and pickles predictions
 - Forecaster.py uses pickles to create forecasts to use in MetaTrader 4 in live trading

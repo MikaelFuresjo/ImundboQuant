@@ -23,3 +23,9 @@ class IQFeaturesConfig(object):
         self.featuresOutputFormat = c["featuresOutputFormat"]
         self.targetsOutputFormat = c["targetsOutputFormat"]
 
+
+    def getFeaturesOutputPath(self) -> str:
+       return os.path.join(self.iqConfig.root, self.featuresOutputFormat.format(self.featuresStrategy))
+
+    def getTargetsOutputPath(self) -> str:
+       return os.path.join(self.iqConfig.root, self.targetsOutputFormat.format(self.targetsStrategy))
