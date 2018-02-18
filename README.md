@@ -28,3 +28,7 @@ OPEN-SOURCE PROJECT | Machine learning in Python and MQL4 for stock market and f
 - CrossValidation.py cross validates the dataset for best possible feature combination.
 - PickleProducer.py takes cross validated output and pickles predictions
 - Forecaster.py uses pickles to create forecasts to use in MetaTrader 4 in live trading
+
+## Data formats
+- MessagePack (.msg) is the main transit format between modules. It is a very fast format, but is binary and is not human readable. 
+- CSV files are therefore generated to be able to inspect generated data.

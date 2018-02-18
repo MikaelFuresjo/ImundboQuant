@@ -2,6 +2,7 @@ import json
 from config.IQCrossValidationConfig import IQCrossValidationConfig
 from config.IQInputConfig import IQInputConfig
 from config.IQFeaturesConfig import IQFeaturesConfig
+from config.IQTrainRandomForestRegressorsConfig import IQTrainRandomForestRegressorsConfig
 from config.IQPickleProducerConfig import IQPickleProducerConfig
 
 # Wrapper for config.json -- DO NOT EDIT
@@ -9,11 +10,11 @@ class IQConfig(object):
     configFile = None
     config = None
 
-    root = None
-    input = None
-    features = None
-    pickleProducer = None
-    crossValidation = None
+    root: str = None
+    input: IQInputConfig = None
+    features: IQFeaturesConfig = None
+    trainRandomForestRegressors: IQTrainRandomForestRegressorsConfig = None
+    pickleProducer: IQPickleProducerConfig = None
 
     def __init__(self, configFile=r"..\config\config.json"):
         self.configFile = configFile
@@ -29,5 +30,5 @@ class IQConfig(object):
         self.root = self.config["root"]
         self.input = IQInputConfig(self)
         self.features = IQFeaturesConfig(self)
+        self.trainRandomForestRegressors = IQTrainRandomForestRegressorsConfig(self)
         self.pickleProducer = IQPickleProducerConfig(self)
-        self.crossValidation= IQCrossValidationConfig(self)
