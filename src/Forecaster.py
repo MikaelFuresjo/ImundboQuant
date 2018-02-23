@@ -2083,7 +2083,7 @@ def main():
 """)
 
 
-    numIterations = 100
+    numIterations = 1000
 
     for i in range(1, numIterations + 1):
         c.timer.print_elapsed("Starting iteration {0} / {1}".format(i, numIterations))
@@ -2099,12 +2099,12 @@ def main():
             
             print("Timestamp of run: {0}".format(timestamp))
 
-            c.timer.print_elapsed("\nIteration {0} / {1} finished, sleeping 30 minutes".format(i, numIterations))
-
-            time.sleep(1800)
         else:
             print("Skipping iteration {0}".format(i))
             pass
+
+        c.timer.print_elapsed("\nIteration {0} / {1} finished, sleeping 30 minutes".format(i, numIterations))
+        time.sleep(1800)
 
 if __name__ == "__main__":
     sys.exit(int(main() or 0))
